@@ -51,6 +51,8 @@ let linesCleared = 0;
 let themeIndex = 0;
 let comboCount = 0;
 let movesSinceLastClear = 0;
+let sfxEnabled = true;
+let musicEnabled = true;
 let dockShapes = [null, null, null];
 let historyStack = []; // Max 5 items
 let draggingState = null;
@@ -87,6 +89,7 @@ const AudioEngine = (() => {
     return {
         // Soft thud when block placed
         place() {
+            if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
@@ -96,6 +99,7 @@ const AudioEngine = (() => {
         },
         // Satisfying whoosh on line clear (1-2 lines)
         clear() {
+            if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
@@ -106,6 +110,7 @@ const AudioEngine = (() => {
         },
         // Punchy combo (3 lines)
         combo() {
+            if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
@@ -114,6 +119,7 @@ const AudioEngine = (() => {
         },
         // Epic ultra fanfare (4 lines)
         ultra() {
+            if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
@@ -125,6 +131,7 @@ const AudioEngine = (() => {
         },
         // Progressive combo sound scaling with multiplier
         comboProgressive(comboIndex) {
+            if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
@@ -141,6 +148,7 @@ const AudioEngine = (() => {
         },
         // Sad descending game over
         gameOver() {
+            if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
@@ -565,6 +573,29 @@ function checkGameOver() {
         }
         
         AudioEngine.gameOver();
+        
+        // Pick a random philosophical motivation quote
+        const MOTIVATIONAL_QUOTES = [
+            "\"Yenilgi, daha zekice başlama fırsatından başka bir şey değildir.\" — Henry Ford",
+            "\"Düşmek hata değildir; düşüp kalmak hatadır.\" — Aristoteles",
+            "\"Engeller, gözünüzü hedeften ayırdığınızda gördüğünüz korkunç şeylerdir.\" — Henry Ford",
+            "\"Hayat bisiklete binmek gibidir, dengeyi korumak için hareket etmeye devam etmelisin.\" — Albert Einstein",
+            "\"En büyük zaferimiz hiç düşmemek değil, her düştüğümüzde ayağa kalkmaktır.\" — Konfüçyüs",
+            "\"Zorluklar, yetenekleri ortaya çıkarır.\" — Horatius",
+            "\"Hiçbir şey bitmiş değildir, ta ki sen vazgeçene kadar.\" — Anonim",
+            "\"Yara, ışığın içeri girdiği yerdir.\" — Mevlana",
+            "\"Gideceği limanı bilmeyene hiçbir rüzgardan fayda gelmez.\" — Seneca",
+            "\"Bugün yapacağın her hamle, yarının temelidir.\" — Zen Felsefesi",
+            "\"Karanlığı lanetlemektense bir mum yakın.\" — Konfüçyüs",
+            "\"Bir kez daha dene. Bir kez daha yenil. Daha iyi yenil.\" — Samuel Beckett",
+            "\"Başarı, hevesini kaybetmeden başarısızlıktan başarısızlığa koşmaktır.\" — Winston Churchill",
+            "\"Gelecek, bugünden hazırlananlara aittir.\" — Malcolm X"
+        ];
+        const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+        const motivationEl = document.getElementById('go-motivation');
+        if (motivationEl) {
+            motivationEl.textContent = randomQuote;
+        }
         
         // Fill game over screen
         document.getElementById('game-over-score').innerText = score.toLocaleString();
@@ -1082,13 +1113,112 @@ function initGame() {
     // High Score load — parse as integer, fallback 0
     highScore = parseInt(localStorage.getItem('blockmaster_highscore'), 10) || 0;
     
+    // Load SFX and Music settings
+    sfxEnabled = localStorage.getItem('blockmaster_sfx') !== 'false';
+    musicEnabled = localStorage.getItem('blockmaster_music') !== 'false';
+    
+    // Update switch elements in DOM
+    const musicTgl = document.getElementById('music-toggle');
+    const sfxTgl = document.getElementById('sfx-toggle');
+    if (musicTgl) musicTgl.checked = musicEnabled;
+    if (sfxTgl) sfxTgl.checked = sfxEnabled;
+    
+    // Show high score on start screen
+    const startHighScoreVal = document.getElementById('start-high-score-val');
+    if (startHighScoreVal) {
+        startHighScoreVal.innerText = highScore.toLocaleString();
+    }
+    
     initBoardDOM();
     resizeCanvas();
-    startNewGame();
+    
+    // Preview board background
+    applyTheme(0);
+    fillBoardDirty();
+    renderBoard();
+    updateUI();
+    updateUndoUI();
     
     // Event listeners
     undoBtn.addEventListener('click', performUndo);
     restartBtn.addEventListener('click', startNewGame);
+    
+    // Settings Button in header
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            document.getElementById('settings-overlay').classList.remove('hidden');
+        });
+    }
+    
+    // Settings Button in start screen
+    const startSettingsBtn = document.getElementById('start-settings-btn');
+    if (startSettingsBtn) {
+        startSettingsBtn.addEventListener('click', () => {
+            document.getElementById('settings-overlay').classList.remove('hidden');
+        });
+    }
+    
+    // Close Settings Button
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', () => {
+            document.getElementById('settings-overlay').classList.add('hidden');
+        });
+    }
+    
+    // Start Game Button
+    const startGameBtn = document.getElementById('start-game-btn');
+    if (startGameBtn) {
+        startGameBtn.addEventListener('click', () => {
+            document.getElementById('start-screen-overlay').classList.add('hidden');
+            startNewGame();
+            AudioEngine.initContext();
+            if (musicEnabled) {
+                startBackgroundMusic();
+            }
+        });
+    }
+    
+    // Music Toggle listener
+    if (musicTgl) {
+        musicTgl.addEventListener('change', (e) => {
+            musicEnabled = e.target.checked;
+            localStorage.setItem('blockmaster_music', String(musicEnabled));
+            if (!musicEnabled) {
+                // Clear chords loop immediately
+                if (chordsInterval) {
+                    clearInterval(chordsInterval);
+                    chordsInterval = null;
+                }
+                musicPlaying = false;
+            } else {
+                startBackgroundMusic();
+            }
+        });
+    }
+    
+    // SFX Toggle listener
+    if (sfxTgl) {
+        sfxTgl.addEventListener('change', (e) => {
+            sfxEnabled = e.target.checked;
+            localStorage.setItem('blockmaster_sfx', String(sfxEnabled));
+        });
+    }
+    
+    // Reset High Score Button listener
+    const resetHighScoreBtn = document.getElementById('reset-high-score-btn');
+    if (resetHighScoreBtn) {
+        resetHighScoreBtn.addEventListener('click', () => {
+            if (confirm("En yüksek skoru sıfırlamak istediğinize emin misiniz?")) {
+                highScore = 0;
+                localStorage.setItem('blockmaster_highscore', '0');
+                updateUI();
+                if (startHighScoreVal) startHighScoreVal.innerText = '0';
+                alert("En yüksek skor sıfırlandı.");
+            }
+        });
+    }
     
     // Dock slots initialization
     document.querySelectorAll('.dock-slot').forEach(slot => {
@@ -1416,6 +1546,5 @@ function startBackgroundMusic() {
 window.addEventListener('pointerdown', () => {
     try {
         AudioEngine.initContext();
-        startBackgroundMusic();
     } catch(e) {}
 }, { once: true });
