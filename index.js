@@ -703,8 +703,11 @@ function checkLinesAndClear() {
     
     const linesCount = completedRows.length + completedCols.length;
     if (linesCount > 0) {
-        // Increment consecutive combo multiplier
+        // Increment consecutive combo multiplier (capped at 50x)
         comboCount++;
+        if (comboCount > 50) {
+            comboCount = 50;
+        }
         movesSinceLastClear = 0;
         
         // Collect coordinates of cells being cleared
@@ -1586,7 +1589,11 @@ function showComboBadge(linesCount, scoreGain, consecutiveCombo) {
     let comboClass = "double";
     
     if (consecutiveCombo >= 2) {
-        multiplierText = ` \u00d7${consecutiveCombo} SERİ!`;
+        if (consecutiveCombo >= 50) {
+            multiplierText = " \u00d750 MAX SERİ!";
+        } else {
+            multiplierText = ` \u00d7${consecutiveCombo} SERİ!`;
+        }
         comboClass = consecutiveCombo >= 4 ? 'ultra' : consecutiveCombo === 3 ? 'mega' : 'double';
     } else {
         multiplierText = linesCount >= 4 ? " \u00d74 ULTRA!" : linesCount === 3 ? " \u00d73 COMBO!" : linesCount === 2 ? " \u00d72 DOUBLE!" : "";
@@ -1631,7 +1638,11 @@ function triggerPunchyComboAnimation(comboIdx) {
         comboPop.classList.add("combo-pop-high");
     }
     
-    comboPop.textContent = `COMBO x${comboIdx}!`;
+    if (comboIdx >= 50) {
+        comboPop.textContent = "COMBO x50 MAX!";
+    } else {
+        comboPop.textContent = `COMBO x${comboIdx}!`;
+    }
     comboPop.classList.remove("hidden");
     
     // Trigger animation flow

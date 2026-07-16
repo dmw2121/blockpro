@@ -2511,3 +2511,14 @@ input:checked + .slider:before {
 @keyframes paySpinner {
     to { transform: rotate(360deg); }
 }
+
+/* Fix PRO badge text contrast inside gradient start-logo */
+.start-logo .logo-badge {
+    background-clip: border-box !important;
+    -webkit-background-clip: border-box !important;
+    -webkit-text-fill-color: #0d1117 !important;
+    color: #0d1117 !important;
+    background: var(--theme-primary) !important;
+    box-shadow: 0 0 10px var(--theme-glow) !important;
+    display: inline-block !important;
+}
