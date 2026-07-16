@@ -574,6 +574,35 @@ function checkGameOver() {
         
         AudioEngine.gameOver();
         
+        // Trigger the sad crumble dispersal and fade effects on the board
+        const boardGrid = document.getElementById('game-board');
+        if (boardGrid) {
+            boardGrid.classList.add('game-over-fade');
+        }
+        const shapesDock = document.getElementById('shapes-dock');
+        if (shapesDock) {
+            shapesDock.classList.add('game-over-fade');
+        }
+        const headerEl = document.querySelector('.game-header');
+        if (headerEl) {
+            headerEl.classList.add('game-over-fade');
+        }
+        
+        // Apply disperse classes with random parameters to all filled cells
+        const filledCells = boardEl.querySelectorAll('.grid-cell.filled');
+        filledCells.forEach(cell => {
+            const randX = (Math.random() - 0.5) * 180; // drift left/right
+            const randY = 300 + Math.random() * 250;   // fall down (gravity)
+            const randR = (Math.random() - 0.5) * 450; // spin random degrees
+            const delay = Math.random() * 0.4;         // staggered fall delay
+            
+            cell.style.setProperty('--disperse-x', `${randX}px`);
+            cell.style.setProperty('--disperse-y', `${randY}px`);
+            cell.style.setProperty('--disperse-r', `${randR}deg`);
+            cell.style.animationDelay = `${delay}s`;
+            cell.classList.add('disperse');
+        });
+        
         // Pick a random philosophical motivation quote
         const MOTIVATIONAL_QUOTES = [
             "\"Yenilgi, daha zekice başlama fırsatından başka bir şey değildir.\" — Henry Ford",
@@ -616,7 +645,10 @@ function checkGameOver() {
             stopConfetti();
         }
         
-        document.getElementById('game-over-overlay').classList.remove('hidden');
+        // Stagger showing the game-over dialog after dispersion finishes (3.6s delay)
+        setTimeout(() => {
+            document.getElementById('game-over-overlay').classList.remove('hidden');
+        }, 3600);
     }
 }
 
@@ -1088,6 +1120,20 @@ function startNewGame() {
     
     // Hide game over overlay and clear overlays
     document.getElementById("game-over-overlay").classList.add("hidden");
+    
+    // Reset game over fade classes
+    const boardGrid = document.getElementById('game-board');
+    if (boardGrid) {
+        boardGrid.classList.remove('game-over-fade');
+    }
+    const shapesDock = document.getElementById('shapes-dock');
+    if (shapesDock) {
+        shapesDock.classList.remove('game-over-fade');
+    }
+    const headerEl = document.querySelector('.game-header');
+    if (headerEl) {
+        headerEl.classList.remove('game-over-fade');
+    }
     
     const comboPop = document.getElementById("combo-pop-overlay");
     if (comboPop) {

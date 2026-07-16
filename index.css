@@ -2099,3 +2099,47 @@ input:checked + .slider:before {
     border-radius: 0 8px 8px 0;
     text-align: left;
 }
+
+/* Game Over Sad Dispersal Animations */
+.board-grid.game-over-fade {
+    transition: filter 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 3.5s ease !important;
+    filter: grayscale(1.0) brightness(0.25) contrast(0.6) blur(0.5px) !important;
+}
+
+.shapes-dock-grid.game-over-fade {
+    transition: filter 3.5s ease, opacity 3.5s ease !important;
+    filter: grayscale(1.0) brightness(0.18) !important;
+    opacity: 0.25 !important;
+}
+
+.game-header.game-over-fade {
+    transition: filter 3.5s ease, opacity 3.5s ease !important;
+    filter: grayscale(0.5) brightness(0.4) !important;
+    opacity: 0.4 !important;
+}
+
+.grid-cell.filled.disperse {
+    animation: blockFallAnim 3.5s cubic-bezier(0.3, 0.1, 0.3, 1) forwards !important;
+    pointer-events: none !important;
+    z-index: 10 !important;
+    transition: none !important;
+}
+
+@keyframes blockFallAnim {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+        opacity: 1;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+    }
+    8% {
+        /* Slight physical bump/lift before falling */
+        transform: translate(0, -6px) rotate(3deg) scale(1.02);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--disperse-x, 0px), var(--disperse-y, 450px)) rotate(var(--disperse-r, 180deg)) scale(0.8);
+        opacity: 0;
+        filter: grayscale(0.9) brightness(0.15);
+        box-shadow: none !important;
+    }
+}
