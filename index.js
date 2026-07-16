@@ -1697,18 +1697,16 @@ function triggerThemeBanner(themeIdx) {
     banner.dataset.timeoutId = String(tId);
 }
 
-// BACKGROUND MUSIC ENGINE (HTML5 MP3 Lo-Fi player looping first 18 seconds with Web Audio API Echo/Delay and smooth crossfades)
+// BACKGROUND MUSIC ENGINE (HTML5 MP3 Player with subtle Web Audio API Echo/Delay and native end-of-track loop)
 let bgMusic = null;
 let musicSource = null;
 let musicGainNode = null;
 let delayNode = null;
 let feedbackGain = null;
 let musicPlaying = false;
-let isFading = false;
 
 function startBackgroundMusic() {
     if (!musicEnabled) return;
-    isFading = false;
     
     try {
         // Initialize AudioContext
@@ -1718,33 +1716,33 @@ function startBackgroundMusic() {
         
         if (!bgMusic) {
             bgMusic = new Audio("lofi_bg.mp3");
-            bgMusic.loop = false;
+            bgMusic.loop = true; // Let the music play all the way to the end and loop naturally
             
             // Connect to AudioContext
             musicSource = ctx.createMediaElementSource(bgMusic);
             
-            // Main control gain node (extremely soft volume: 0.006)
+            // Main control gain node (slightly increased to 0.015 volume, soft but clearly audible)
             musicGainNode = ctx.createGain();
-            musicGainNode.gain.setValueAtTime(0.006, ctx.currentTime);
+            musicGainNode.gain.setValueAtTime(0.015, ctx.currentTime);
             
-            // Delay node for spacious echo
+            // Delay node for subtle echo
             delayNode = ctx.createDelay();
-            delayNode.delayTime.setValueAtTime(0.45, ctx.currentTime); // 0.45s delay spacing
+            delayNode.delayTime.setValueAtTime(0.25, ctx.currentTime); // 0.25s delay
             
-            // Feedback gain node for delay loop
+            // Feedback gain node for subtle delay repeats
             feedbackGain = ctx.createGain();
-            feedbackGain.gain.setValueAtTime(0.45, ctx.currentTime); // 45% feedback repeats
+            feedbackGain.gain.setValueAtTime(0.18, ctx.currentTime); // 18% feedback repeats
             
             // Connect feedback loop
             delayNode.connect(feedbackGain);
             feedbackGain.connect(delayNode);
             
-            // Dry & Wet signals mixing
+            // Dry & Wet signals mixing (reduced echo presence)
             const dryGain = ctx.createGain();
-            dryGain.gain.setValueAtTime(0.75, ctx.currentTime);
+            dryGain.gain.setValueAtTime(0.85, ctx.currentTime);
             
             const wetGain = ctx.createGain();
-            wetGain.gain.setValueAtTime(0.55, ctx.currentTime); // 55% wet echo signal (more echoed)
+            wetGain.gain.setValueAtTime(0.2, ctx.currentTime); // 20% wet echo signal (reduced echo)
             
             // Route Dry signal: Source -> Dry -> Main Gain
             musicSource.connect(dryGain);
@@ -1757,71 +1755,12 @@ function startBackgroundMusic() {
             
             // Connect main gain to destination
             musicGainNode.connect(ctx.destination);
-            
-            // Timeupdate listener for smooth fade out and loop transition at exactly 18 seconds
-            bgMusic.addEventListener("timeupdate", () => {
-                const fadeDuration = 1.0; // 1 second crossfade for extra softness
-                const loopCutoff = 18.0;
-                
-                if (bgMusic.currentTime >= (loopCutoff - fadeDuration) && musicPlaying && !isFading) {
-                    isFading = true;
-                    const now = ctx.currentTime;
-                    
-                    // Smoothly fade out main gain to 0
-                    musicGainNode.gain.cancelScheduledValues(now);
-                    musicGainNode.gain.setValueAtTime(musicGainNode.gain.value, now);
-                    musicGainNode.gain.linearRampToValueAtTime(0, now + fadeDuration);
-                    
-                    // Seek to 0, start playing and fade in
-                    setTimeout(() => {
-                        if (musicPlaying) {
-                            bgMusic.currentTime = 0;
-                            const playPromise = bgMusic.play();
-                            if (playPromise !== undefined) {
-                                playPromise.then(() => {
-                                    const nowIn = ctx.currentTime;
-                                    musicGainNode.gain.cancelScheduledValues(nowIn);
-                                    musicGainNode.gain.setValueAtTime(0, nowIn);
-                                    musicGainNode.gain.linearRampToValueAtTime(0.006, nowIn + fadeDuration);
-                                    
-                                    // Release fade lock after fade-in finishes
-                                    setTimeout(() => {
-                                        isFading = false;
-                                    }, fadeDuration * 1000);
-                                }).catch(() => {
-                                    isFading = false;
-                                });
-                            } else {
-                                isFading = false;
-                            }
-                        } else {
-                            isFading = false;
-                        }
-                    }, fadeDuration * 1000);
-                }
-            });
-            
-            // Ended listener fallback
-            bgMusic.addEventListener("ended", () => {
-                if (musicPlaying) {
-                    bgMusic.currentTime = 0;
-                    const playPromise = bgMusic.play();
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            const nowIn = ctx.currentTime;
-                            musicGainNode.gain.cancelScheduledValues(nowIn);
-                            musicGainNode.gain.setValueAtTime(0, nowIn);
-                            musicGainNode.gain.linearRampToValueAtTime(0.006, nowIn + 1.0);
-                        }).catch(() => {});
-                    }
-                }
-            });
         }
         
         // Reset time and ramp up gain immediately on play
         const nowPlay = ctx.currentTime;
         musicGainNode.gain.cancelScheduledValues(nowPlay);
-        musicGainNode.gain.setValueAtTime(0.006, nowPlay);
+        musicGainNode.gain.setValueAtTime(0.015, nowPlay);
         
         bgMusic.currentTime = 0;
         musicPlaying = true;
