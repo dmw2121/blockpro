@@ -53,6 +53,7 @@ let comboCount = 0;
 let movesSinceLastClear = 0;
 let sfxEnabled = true;
 let musicEnabled = true;
+let premiumUnlocked = false;
 let dockShapes = [null, null, null];
 let historyStack = []; // Max 5 items
 let draggingState = null;
@@ -1162,6 +1163,7 @@ function initGame() {
     // Load SFX and Music settings
     sfxEnabled = localStorage.getItem('blockmaster_sfx') !== 'false';
     musicEnabled = localStorage.getItem('blockmaster_music') !== 'false';
+    premiumUnlocked = localStorage.getItem('blockmaster_premium') === 'true';
     
     // Update switch elements in DOM
     const musicTgl = document.getElementById('music-toggle');
@@ -1225,6 +1227,28 @@ function initGame() {
             }
         });
     }
+    
+    // Premium Close Button
+    const closePremiumBtn = document.getElementById('close-premium-btn');
+    if (closePremiumBtn) {
+        closePremiumBtn.addEventListener('click', () => {
+            document.getElementById('premium-overlay').classList.add('hidden');
+        });
+    }
+    
+    // Premium Buy Button
+    const buyPremiumBtn = document.getElementById('buy-premium-btn');
+    if (buyPremiumBtn) {
+        buyPremiumBtn.addEventListener('click', () => {
+            premiumUnlocked = true;
+            localStorage.setItem('blockmaster_premium', 'true');
+            document.getElementById('premium-overlay').classList.add('hidden');
+            // Re-render theme picker so padlocks disappear
+            initThemePicker();
+            alert("Tebrikler! Premium üyelik satın alındı. Tüm temaların kilidi açıldı! \uD83D\uDC51");
+        });
+    }
+
     
     // Music Toggle listener
     if (musicTgl) {
@@ -1357,22 +1381,36 @@ window.addEventListener("resize", resizeCanvas);
 window.addEventListener("DOMContentLoaded", initGame);
 
 // BOTTOM THEME PICKER FUNCTIONS
+function isThemeUnlocked(index) {
+    if (index === 0 || index === 1) return true;
+    if (premiumUnlocked) return true;
+    if (highScore >= 1000000) return true;
+    return false;
+}
+
 function initThemePicker() {
     const picker = document.getElementById("theme-scroll-picker");
     if (!picker) return;
     picker.innerHTML = "";
     
     const themeIcons = ["\uD83C\uDF3F", "\uD83C\uDFDB\uFE0F", "\u2744\uFE0F", "\uD83C\uDFDC\uFE0F", "\uD83D\uDC19", "\uD83C\uDF0B", "\uD83C\uDF0C", "\u26D3\uFE0F"];
-    const themeLabels = ["Orman", "G\u00f6ky\u00fcz\u00fc", "Buz", "\u00c7\u00f6l", "Sualt\u0131", "Volkan", "Uzay", "Zindan"];
+    const themeLabels = ["Orman", "Gökyüzü", "Buz", "Çöl", "Sualtı", "Volkan", "Uzay", "Zindan"];
     
     for (let i = 0; i < 8; i++) {
         const btn = document.createElement("button");
-        btn.className = `theme-btn theme-icon-btn`;
         btn.dataset.themeIndex = i;
         btn.title = themeLabels[i];
+        
+        const unlocked = isThemeUnlocked(i);
+        btn.className = `theme-btn theme-icon-btn${unlocked ? "" : " locked"}`;
         btn.innerHTML = `<span class="theme-icon-only">${themeIcons[i]}</span>`;
         
         btn.addEventListener("click", () => {
+            if (!isThemeUnlocked(i)) {
+                // Open premium upgrade modal
+                document.getElementById('premium-overlay').classList.remove('hidden');
+                return;
+            }
             saveToHistory();
             applyTheme(i);
         });
