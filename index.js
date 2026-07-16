@@ -1723,17 +1723,17 @@ function startBackgroundMusic() {
             // Connect to AudioContext
             musicSource = ctx.createMediaElementSource(bgMusic);
             
-            // Main control gain node (lowered to 0.03 volume, which is 20% of 0.15)
+            // Main control gain node (extremely soft volume: 0.006)
             musicGainNode = ctx.createGain();
-            musicGainNode.gain.setValueAtTime(0.03, ctx.currentTime);
+            musicGainNode.gain.setValueAtTime(0.006, ctx.currentTime);
             
-            // Delay node for echo
+            // Delay node for spacious echo
             delayNode = ctx.createDelay();
-            delayNode.delayTime.setValueAtTime(0.35, ctx.currentTime); // 0.35s delay
+            delayNode.delayTime.setValueAtTime(0.45, ctx.currentTime); // 0.45s delay spacing
             
             // Feedback gain node for delay loop
             feedbackGain = ctx.createGain();
-            feedbackGain.gain.setValueAtTime(0.3, ctx.currentTime); // 30% feedback
+            feedbackGain.gain.setValueAtTime(0.45, ctx.currentTime); // 45% feedback repeats
             
             // Connect feedback loop
             delayNode.connect(feedbackGain);
@@ -1741,10 +1741,10 @@ function startBackgroundMusic() {
             
             // Dry & Wet signals mixing
             const dryGain = ctx.createGain();
-            dryGain.gain.setValueAtTime(0.85, ctx.currentTime);
+            dryGain.gain.setValueAtTime(0.75, ctx.currentTime);
             
             const wetGain = ctx.createGain();
-            wetGain.gain.setValueAtTime(0.45, ctx.currentTime); // 45% wet echo signal
+            wetGain.gain.setValueAtTime(0.55, ctx.currentTime); // 55% wet echo signal (more echoed)
             
             // Route Dry signal: Source -> Dry -> Main Gain
             musicSource.connect(dryGain);
@@ -1758,9 +1758,9 @@ function startBackgroundMusic() {
             // Connect main gain to destination
             musicGainNode.connect(ctx.destination);
             
-            // Timeupdate listener for smooth fade out and loop transition at 18 seconds
+            // Timeupdate listener for smooth fade out and loop transition at exactly 18 seconds
             bgMusic.addEventListener("timeupdate", () => {
-                const fadeDuration = 0.8; // seconds
+                const fadeDuration = 1.0; // 1 second crossfade for extra softness
                 const loopCutoff = 18.0;
                 
                 if (bgMusic.currentTime >= (loopCutoff - fadeDuration) && musicPlaying && !isFading) {
@@ -1782,7 +1782,7 @@ function startBackgroundMusic() {
                                     const nowIn = ctx.currentTime;
                                     musicGainNode.gain.cancelScheduledValues(nowIn);
                                     musicGainNode.gain.setValueAtTime(0, nowIn);
-                                    musicGainNode.gain.linearRampToValueAtTime(0.03, nowIn + fadeDuration);
+                                    musicGainNode.gain.linearRampToValueAtTime(0.006, nowIn + fadeDuration);
                                     
                                     // Release fade lock after fade-in finishes
                                     setTimeout(() => {
@@ -1811,7 +1811,7 @@ function startBackgroundMusic() {
                             const nowIn = ctx.currentTime;
                             musicGainNode.gain.cancelScheduledValues(nowIn);
                             musicGainNode.gain.setValueAtTime(0, nowIn);
-                            musicGainNode.gain.linearRampToValueAtTime(0.03, nowIn + 0.8);
+                            musicGainNode.gain.linearRampToValueAtTime(0.006, nowIn + 1.0);
                         }).catch(() => {});
                     }
                 }
@@ -1821,7 +1821,7 @@ function startBackgroundMusic() {
         // Reset time and ramp up gain immediately on play
         const nowPlay = ctx.currentTime;
         musicGainNode.gain.cancelScheduledValues(nowPlay);
-        musicGainNode.gain.setValueAtTime(0.03, nowPlay);
+        musicGainNode.gain.setValueAtTime(0.006, nowPlay);
         
         bgMusic.currentTime = 0;
         musicPlaying = true;
