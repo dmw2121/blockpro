@@ -214,8 +214,8 @@ function fillBoardDirty() {
     // Reset board array
     board = Array(8).fill(null).map(() => Array(8).fill(0));
     
-    // Choose fill count between 19 and 25 cells (approx 30% - 40%)
-    const fillCount = 19 + Math.floor(Math.random() * 7);
+    // Choose exactly 19 cells for exactly 30% fill rate (19 / 64 cells ≈ 30%)
+    const fillCount = 19;
     
     // Create pool of all 64 board coordinates
     let coords = [];
