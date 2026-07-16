@@ -146,6 +146,17 @@ const AudioEngine = (() => {
                 const t = ctx_a.currentTime;
                 [440, 370, 311, 262].forEach((f, i) => tone(f, 'sawtooth', 0.18, 0.25, t + i * 0.18));
             } catch(e) {}
+        },
+        initContext() {
+            try {
+                init();
+                if (ctx_a && ctx_a.state === 'suspended') {
+                    ctx_a.resume();
+                }
+            } catch(e) {}
+        },
+        getContext() {
+            return ctx_a;
         }
     };
 })();
@@ -1309,3 +1320,74 @@ function triggerThemeBanner(themeIdx) {
     }, 2250);
     banner.dataset.timeoutId = String(tId);
 }
+
+// BACKGROUND MUSIC ENGINE (ambient soft loops)
+let musicPlaying = false;
+let chordsInterval = null;
+
+function startBackgroundMusic() {
+    if (musicPlaying) return;
+    musicPlaying = true;
+    
+    // Play a loop of soft, relaxing ambient chords (Cmaj7 -> Am7 -> Fmaj7 -> G6)
+    const chords = [
+        [130.81, 164.81, 196.00, 246.94], // Cmaj7
+        [110.00, 130.81, 164.81, 196.00], // Am7
+        [87.31, 130.81, 174.61, 220.00],  // Fmaj7
+        [98.00, 146.83, 196.00, 246.94]   // G6
+    ];
+    
+    let currentChord = 0;
+    
+    function playNextChord() {
+        try {
+            AudioEngine.initContext();
+            const ctx_a = AudioEngine.getContext();
+            if (!ctx_a || ctx_a.state === 'suspended') return;
+            
+            const now = ctx_a.currentTime;
+            const duration = 6.0; // Play chord for 6 seconds
+            const freqs = chords[currentChord];
+            
+            freqs.forEach((freq) => {
+                const osc = ctx_a.createOscillator();
+                const gainNode = ctx_a.createGain();
+                const filter = ctx_a.createBiquadFilter();
+                
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(320, now); // Low cutoff for warm ambient sound
+                
+                osc.connect(gainNode);
+                gainNode.connect(filter);
+                filter.connect(ctx_a.destination);
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                
+                // Slow attack and release for absolute smoothness
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.012, now + 2.0); // Extremely quiet background gain
+                gainNode.gain.setValueAtTime(0.012, now + duration - 2.0);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                
+                osc.start(now);
+                osc.stop(now + duration + 0.1);
+            });
+            
+            currentChord = (currentChord + 1) % chords.length;
+        } catch(e) {
+            console.log("BG Music play error: ", e);
+        }
+    }
+    
+    playNextChord();
+    chordsInterval = setInterval(playNextChord, 6000);
+}
+
+// User Interaction Trigger to comply with modern browser autoplay policies
+window.addEventListener('pointerdown', () => {
+    try {
+        AudioEngine.initContext();
+        startBackgroundMusic();
+    } catch(e) {}
+}, { once: true });

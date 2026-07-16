@@ -1732,72 +1732,73 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0);
+    transform: translate(-50%, -50%) scaleX(0);
+    width: 100%;
+    padding: 16px 0;
     font-family: 'Outfit', 'Inter', sans-serif;
-    font-size: 2.8rem;
+    font-size: 2.3rem;
     font-weight: 900;
     font-style: italic;
     color: #fff;
-    text-shadow: 
-        0 0 10px rgba(255, 255, 255, 0.8),
-        0 0 20px #ff007f,
-        0 0 40px #ff007f,
-        0 0 80px #ff007f;
-    -webkit-text-stroke: 1.5px #000;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.6);
     pointer-events: none;
     z-index: 1100;
     opacity: 0;
     white-space: nowrap;
     text-align: center;
-    background: radial-gradient(circle, rgba(255,0,127,0.15) 0%, rgba(0,0,0,0) 70%);
-    padding: 40px;
-    border-radius: 50%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border-top: 3px solid rgba(255, 255, 255, 0.35);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.35);
+    will-change: transform, opacity;
 }
 
 .combo-pop-overlay.animate {
-    animation: comboPunchAnim 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: comboBarAnim 1.4s cubic-bezier(0.19, 1, 0.22, 1) forwards;
 }
 
 .combo-pop-overlay.combo-pop-2 {
-    text-shadow: 0 0 10px #fff, 0 0 20px #3b82f6, 0 0 40px #3b82f6;
-    background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(0,0,0,0) 70%);
+    background: linear-gradient(90deg, rgba(59,130,246,0) 0%, rgba(59,130,246,0.9) 20%, rgba(59,130,246,0.9) 80%, rgba(59,130,246,0) 100%);
+    border-color: rgba(96, 165, 250, 0.6);
+    text-shadow: 0 0 10px #fff, 0 0 20px #2563eb, 0 0 30px #2563eb;
 }
 .combo-pop-overlay.combo-pop-3 {
-    text-shadow: 0 0 10px #fff, 0 0 20px #ec4899, 0 0 40px #ec4899;
-    background: radial-gradient(circle, rgba(236,72,153,0.15) 0%, rgba(0,0,0,0) 70%);
+    background: linear-gradient(90deg, rgba(236,72,153,0) 0%, rgba(236,72,153,0.92) 20%, rgba(236,72,153,0.92) 80%, rgba(236,72,153,0) 100%);
+    border-color: rgba(244, 114, 182, 0.6);
+    text-shadow: 0 0 10px #fff, 0 0 20px #db2777, 0 0 30px #db2777;
 }
 .combo-pop-overlay.combo-pop-4 {
-    text-shadow: 0 0 10px #fff, 0 0 20px #ffd700, 0 0 40px #ff4500;
-    background: radial-gradient(circle, rgba(255,69,0,0.2) 0%, rgba(0,0,0,0) 70%);
+    background: linear-gradient(90deg, rgba(245,158,11,0) 0%, rgba(245,158,11,0.95) 20%, rgba(245,158,11,0.95) 80%, rgba(245,158,11,0) 100%);
+    border-color: rgba(251, 191, 36, 0.6);
+    text-shadow: 0 0 10px #fff, 0 0 20px #d97706, 0 0 30px #ffd700;
 }
 .combo-pop-overlay.combo-pop-high {
-    text-shadow: 0 0 10px #fff, 0 0 20px #00ff88, 0 0 40px #a855f7;
-    background: radial-gradient(circle, rgba(168,85,247,0.25) 0%, rgba(0,0,0,0) 70%);
+    background: linear-gradient(90deg, rgba(168,85,247,0) 0%, rgba(168,85,247,0.95) 20%, rgba(168,85,247,0.95) 80%, rgba(168,85,247,0) 100%);
+    border-color: rgba(192, 132, 252, 0.7);
+    text-shadow: 0 0 10px #fff, 0 0 20px #a855f7, 0 0 40px #00ff88;
 }
 
-@keyframes comboPunchAnim {
+@keyframes comboBarAnim {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.3) rotate(-15deg);
-        filter: blur(10px);
+        transform: translate(-50%, -50%) scaleX(0);
+        filter: blur(8px);
     }
-    12% {
+    15% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1.3) rotate(8deg);
+        transform: translate(-50%, -50%) scaleX(1);
         filter: blur(0);
     }
-    24% {
-        transform: translate(-50%, -50%) scale(0.95) rotate(-4deg);
-    }
-    70% {
+    85% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1.0) rotate(-2deg);
-        filter: drop-shadow(0 0 15px rgba(255,255,255,0.6));
+        transform: translate(-50%, -50%) scaleX(1);
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(1.6) translateY(-40px) rotate(12deg);
-        filter: blur(8px);
+        transform: translate(-50%, -50%) scaleX(0);
+        filter: blur(12px);
     }
 }
 
@@ -1823,6 +1824,7 @@ body {
     z-index: 1200;
     opacity: 0;
     white-space: nowrap;
+    will-change: transform, opacity;
 }
 
 .theme-banner-overlay.animate {
