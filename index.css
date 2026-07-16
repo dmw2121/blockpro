@@ -2521,4 +2521,9 @@ input:checked + .slider:before {
     background: var(--theme-primary) !important;
     box-shadow: 0 0 10px var(--theme-glow) !important;
     display: inline-block !important;
+    vertical-align: middle !important;
+    font-size: 0.62rem !important;
+    padding: 3px 6px !important;
+    margin-left: 6px !important;
+    line-height: 1 !important;
 }

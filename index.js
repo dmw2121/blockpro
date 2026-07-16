@@ -592,6 +592,10 @@ function checkGameOver() {
         }
         
         AudioEngine.gameOver();
+        if (bgMusic) {
+            bgMusic.pause();
+            musicPlaying = false;
+        }
         
         // Trigger the sad crumble dispersal and fade effects on the board
         const boardGrid = document.getElementById('game-board');
@@ -1174,6 +1178,9 @@ function startNewGame() {
     renderBoard();
     updateUI();
     updateUndoUI();
+    if (musicEnabled) {
+        startBackgroundMusic();
+    }
 }
 
 // SETUP CORE ENGINE CONNECTIONS
@@ -1690,86 +1697,39 @@ function triggerThemeBanner(themeIdx) {
     banner.dataset.timeoutId = String(tId);
 }
 
-// BACKGROUND MUSIC ENGINE (ambient cheerful arpeggios)
+// BACKGROUND MUSIC ENGINE (HTML5 MP3 Lo-Fi player looping first 24 seconds)
+let bgMusic = null;
 let musicPlaying = false;
-let chordsInterval = null; // Used as the timeout tracker
-let currentStep = 0;
 
 function startBackgroundMusic() {
+    if (!musicEnabled) return;
     if (musicPlaying) return;
     musicPlaying = true;
-    currentStep = 0;
     
-    // Cheerful progression: C -> G -> Am -> F (Music Box arpeggios)
-    const melody = [
-        // C Major (cheerful)
-        { freq: 130.81, gain: 0.005, dur: 0.8 }, // C3
-        { freq: 196.00, gain: 0.004, dur: 0.8 }, // G3
-        { freq: 329.63, gain: 0.004, dur: 0.8 }, // E4
-        { freq: 261.63, gain: 0.004, dur: 0.8 }, // C4
-        
-        // G Major (cheerful)
-        { freq: 98.00,  gain: 0.005, dur: 0.8 }, // G2
-        { freq: 146.83, gain: 0.004, dur: 0.8 }, // D3
-        { freq: 293.66, gain: 0.004, dur: 0.8 }, // D4
-        { freq: 196.00, gain: 0.004, dur: 0.8 }, // G3
-        
-        // A Minor (gentle contrast)
-        { freq: 110.00, gain: 0.005, dur: 0.8 }, // A2
-        { freq: 164.81, gain: 0.004, dur: 0.8 }, // E3
-        { freq: 261.63, gain: 0.004, dur: 0.8 }, // C4
-        { freq: 220.00, gain: 0.004, dur: 0.8 }, // A3
-        
-        // F Major (resolving happily)
-        { freq: 87.31,  gain: 0.005, dur: 0.8 }, // F2
-        { freq: 130.81, gain: 0.004, dur: 0.8 }, // C3
-        { freq: 349.23, gain: 0.004, dur: 0.8 }, // F4
-        { freq: 261.63, gain: 0.004, dur: 0.8 }  // C4
-    ];
-    
-    const stepDuration = 550; // ms per step (approx 110 BPM)
-    
-    function playStep() {
-        if (!musicPlaying) return;
-        
-        try {
-            AudioEngine.initContext();
-            const ctx_a = AudioEngine.getContext();
-            if (ctx_a && ctx_a.state !== 'suspended') {
-                const now = ctx_a.currentTime;
-                const note = melody[currentStep];
-                
-                const osc = ctx_a.createOscillator();
-                const gainNode = ctx_a.createGain();
-                const filter = ctx_a.createBiquadFilter();
-                
-                filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(380, now); // soft warm cut to sit quietly in the back
-                
-                osc.connect(gainNode);
-                gainNode.connect(filter);
-                filter.connect(ctx_a.destination);
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(note.freq, now);
-                
-                // Extremely quiet and gentle fade in / fade out
-                gainNode.gain.setValueAtTime(0, now);
-                gainNode.gain.linearRampToValueAtTime(note.gain, now + 0.08); // slow soft attack
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + note.dur); // long release
-                
-                osc.start(now);
-                osc.stop(now + note.dur + 0.1);
-            }
-        } catch(e) {
-            console.log("Music step play error:", e);
+    try {
+        if (!bgMusic) {
+            bgMusic = new Audio("lofi_bg.mp3");
+            bgMusic.volume = 0.04; // Very quiet background sound
+            bgMusic.loop = false;
+            
+            // Loop the first 24 seconds of the track (before the beat gets too active/hype)
+            bgMusic.addEventListener("timeupdate", () => {
+                if (bgMusic.currentTime >= 24) {
+                    bgMusic.currentTime = 0;
+                    if (musicPlaying) {
+                        bgMusic.play().catch(() => {});
+                    }
+                }
+            });
         }
-        
-        currentStep = (currentStep + 1) % melody.length;
-        chordsInterval = setTimeout(playStep, stepDuration);
+        bgMusic.play().catch(e => {
+            console.log("Audio play failed:", e);
+            musicPlaying = false;
+        });
+    } catch(e) {
+        console.log("Audio engine error:", e);
+        musicPlaying = false;
     }
-    
-    playStep();
 }
 
 // User Interaction Trigger to comply with modern browser autoplay policies
