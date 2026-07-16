@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Block Master Pro - Premium Block Puzzle Game</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Background glowing orbs (hidden on mobile for performance) -->
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+
+    <div class="game-wrapper">
+        <!-- Top Control and Stats Panel -->
+        <header class="game-header glass-panel">
+            <div class="header-left">
+                <div class="logo-container">
+                    <h1 class="logo-text">BLOCK MASTER <span class="logo-badge">PRO</span></h1>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-card big-score-card">
+                        <span class="stat-label">SKOR</span>
+                        <span class="stat-value big-score-value" id="current-score">0</span>
+                        <span id="combo-badge" class="combo-badge hidden"></span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">EN YÜK.</span>
+                        <span class="stat-value" id="high-score">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">SATIR</span>
+                        <span class="stat-value" id="lines-cleared">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="undo-btn" class="icon-btn glass-panel" title="Geri Al (Son 5 Hamle)">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 7v6h6"></path>
+                        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+                    </svg>
+                    <span>Geri Al</span>
+                    <span id="undo-badge" class="badge">0/5</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Board and Dock Area -->
+        <main class="game-main">
+            <!-- Grid Board Area -->
+            <div class="board-container glass-panel">
+                <div id="game-board" class="board-grid">
+                    <!-- 8x8 Grid Cells will be generated dynamically by JS -->
+                </div>
+                <!-- Particle canvas overlay for explosion effects -->
+                <canvas id="effects-canvas" class="effects-overlay"></canvas>
+            </div>
+
+            <!-- Drag & Drop Dock -->
+            <div class="dock-container glass-panel">
+                <div class="dock-title">PARÇALAR</div>
+                <div id="shapes-dock" class="shapes-dock-grid">
+                    <!-- 3 Shape containers will be populated dynamically -->
+                    <div class="dock-slot" id="slot-0"></div>
+                    <div class="dock-slot" id="slot-1"></div>
+                    <div class="dock-slot" id="slot-2"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Theme Selector Panel -->
+        <div class="theme-picker-panel glass-panel">
+            <div id="theme-scroll-picker" class="theme-scroll-picker">
+                <!-- Theme buttons will be generated dynamically by JS -->
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <!-- Game Over Overlay -->
+    <div id="game-over-overlay" class="go-overlay hidden">
+        <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+        <div class="go-card glass-panel">
+            <div class="go-emoji" id="go-emoji">💀</div>
+            <h2 class="go-title">OYUN BİTTİ</h2>
+            <p class="go-subtitle" id="go-subtitle">Hamle kalmadı!</p>
+
+            <div class="go-scores">
+                <div class="go-score-box">
+                    <span class="go-score-label">SKOR</span>
+                    <span class="go-score-val" id="game-over-score">0</span>
+                </div>
+                <div class="go-score-divider"></div>
+                <div class="go-score-box go-score-best">
+                    <span class="go-score-label">🏆 EN İYİ</span>
+                    <span class="go-score-val" id="game-over-high">0</span>
+                    <span class="go-new-record hidden" id="go-new-record">YENİ REKOR! 🎉</span>
+                </div>
+            </div>
+
+            <div class="go-stats-row">
+                <div class="go-stat">
+                    <span class="go-stat-val" id="go-lines">0</span>
+                    <span class="go-stat-lbl">Satır</span>
+                </div>
+            </div>
+
+            <button id="restart-btn" class="go-restart-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                YENİDEN OYNA
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating visual clone during dragging -->
+    <div id="drag-clone" class="drag-clone hidden"></div>
+
+    <!-- Main Game Script -->
+    <script src="index.js"></script>
+</body>
+</html>
