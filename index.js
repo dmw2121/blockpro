@@ -1697,35 +1697,49 @@ function triggerThemeBanner(themeIdx) {
     banner.dataset.timeoutId = String(tId);
 }
 
-// BACKGROUND MUSIC ENGINE (HTML5 MP3 Lo-Fi player looping first 24 seconds)
+// BACKGROUND MUSIC ENGINE (HTML5 MP3 Lo-Fi player looping first 19 seconds)
 let bgMusic = null;
 let musicPlaying = false;
 
 function startBackgroundMusic() {
     if (!musicEnabled) return;
-    if (musicPlaying) return;
-    musicPlaying = true;
     
     try {
         if (!bgMusic) {
             bgMusic = new Audio("lofi_bg.mp3");
-            bgMusic.volume = 0.04; // Very quiet background sound
+            bgMusic.volume = 0.15; // Set volume higher so it's clearly audible but still soft
             bgMusic.loop = false;
             
-            // Loop the first 24 seconds of the track (before the beat gets too active/hype)
+            // Loop the first 19 seconds of the track (before the beat gets active/hype)
             bgMusic.addEventListener("timeupdate", () => {
-                if (bgMusic.currentTime >= 24) {
+                if (bgMusic.currentTime >= 19) {
                     bgMusic.currentTime = 0;
                     if (musicPlaying) {
-                        bgMusic.play().catch(() => {});
+                        bgMusic.play().catch(e => console.log("Loop play failed:", e));
                     }
                 }
             });
+            
+            // Ended fallback just in case
+            bgMusic.addEventListener("ended", () => {
+                bgMusic.currentTime = 0;
+                if (musicPlaying) {
+                    bgMusic.play().catch(e => console.log("Ended play failed:", e));
+                }
+            });
         }
-        bgMusic.play().catch(e => {
-            console.log("Audio play failed:", e);
-            musicPlaying = false;
-        });
+        
+        // Reset and play immediately
+        bgMusic.currentTime = 0;
+        musicPlaying = true;
+        
+        const playPromise = bgMusic.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => {
+                console.log("Audio play failed:", e);
+                musicPlaying = false;
+            });
+        }
     } catch(e) {
         console.log("Audio engine error:", e);
         musicPlaying = false;
