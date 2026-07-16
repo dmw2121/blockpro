@@ -49,6 +49,8 @@ let score = 0;
 let highScore = 0;
 let linesCleared = 0;
 let themeIndex = 0;
+let comboCount = 0;
+let movesSinceLastClear = 0;
 let dockShapes = [null, null, null];
 let historyStack = []; // Max 5 items
 let draggingState = null;
@@ -118,6 +120,22 @@ const AudioEngine = (() => {
                 [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => {
                     tone(f, 'triangle', 0.25, 0.22, t + i * 0.07);
                     tone(f * 2, 'sine', 0.10, 0.20, t + i * 0.07 + 0.01);
+                });
+            } catch(e) {}
+        },
+        // Progressive combo sound scaling with multiplier
+        comboProgressive(comboIndex) {
+            try {
+                init();
+                const t = ctx_a.currentTime;
+                // Base notes shifted up by comboIndex semitones
+                const baseFreqs = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+                const semitones = comboIndex - 1;
+                const factor = Math.pow(1.059463, semitones); // Standard 12-TET tuning step
+                baseFreqs.forEach((f, i) => {
+                    tone(f * factor, 'triangle', 0.22, 0.18, t + i * 0.08);
+                    // Add secondary harmony sine wave
+                    tone(f * factor * 1.5, 'sine', 0.08, 0.12, t + i * 0.08 + 0.02);
                 });
             } catch(e) {}
         },
@@ -291,7 +309,9 @@ function saveToHistory() {
         score: score,
         linesCleared: linesCleared,
         dockShapes: JSON.parse(JSON.stringify(dockShapes)),
-        themeIndex: themeIndex
+        themeIndex: themeIndex,
+        comboCount: comboCount,
+        movesSinceLastClear: movesSinceLastClear
     };
     
     historyStack.push(state);
@@ -324,6 +344,8 @@ function performUndo() {
     linesCleared = prevState.linesCleared;
     dockShapes = JSON.parse(JSON.stringify(prevState.dockShapes));
     themeIndex = prevState.themeIndex;
+    comboCount = prevState.comboCount;
+    movesSinceLastClear = prevState.movesSinceLastClear;
     
     applyTheme(themeIndex);
     renderBoard();
@@ -588,6 +610,10 @@ function checkLinesAndClear() {
     
     const linesCount = completedRows.length + completedCols.length;
     if (linesCount > 0) {
+        // Increment consecutive combo multiplier
+        comboCount++;
+        movesSinceLastClear = 0;
+        
         // Collect coordinates of cells being cleared
         const cellsToClear = new Set();
         completedRows.forEach(r => {
@@ -623,32 +649,44 @@ function checkLinesAndClear() {
             for (let r = 0; r < 8; r++) board[r][c] = 0;
         });
         
-        // Score formula with 3x/4x multiplier bonus
+        // Base Score formula with 3x/4x simultaneous line clear multiplier bonus
         let scoreGain = linesCount * 100 * linesCount;
         if (linesCount >= 4) {
             scoreGain = Math.round(scoreGain * 4);
-            AudioEngine.ultra();
         } else if (linesCount >= 3) {
             scoreGain = Math.round(scoreGain * 3);
-            AudioEngine.combo();
-        } else {
-            AudioEngine.clear();
         }
+        
+        // Apply consecutive combo multiplier if active
+        if (comboCount >= 2) {
+            scoreGain = scoreGain * comboCount;
+            AudioEngine.comboProgressive(comboCount);
+            triggerPunchyComboAnimation(comboCount);
+        } else {
+            // Normal audio signals
+            if (linesCount >= 4) {
+                AudioEngine.ultra();
+            } else if (linesCount >= 3) {
+                AudioEngine.combo();
+            } else {
+                AudioEngine.clear();
+            }
+        }
+        
         score += scoreGain;
         
-        // Show combo badge
-        if (linesCount >= 2) {
-            showComboBadge(linesCount, scoreGain);
-        }
+        // Show combo badge on the score display
+        showComboBadge(linesCount, scoreGain, comboCount);
         
         const oldLines = linesCleared;
         linesCleared += linesCount;
         
-        // Check theme transition threshold (Every 25 cleared lines)
-        const oldThreshold = Math.floor(oldLines / 25);
-        const newThreshold = Math.floor(linesCleared / 25);
+        // Check theme transition threshold (Every 20 cleared lines)
+        const oldThreshold = Math.floor(oldLines / 20);
+        const newThreshold = Math.floor(linesCleared / 20);
         if (newThreshold > oldThreshold) {
             nextTheme();
+            triggerThemeBanner(themeIndex);
         }
         
         // Delayed board visual updates for explosion animations to render first
@@ -657,6 +695,11 @@ function checkLinesAndClear() {
             updateUI();
         }, 80);
     } else {
+        // No line cleared this turn
+        movesSinceLastClear++;
+        if (movesSinceLastClear >= 3) {
+            comboCount = 0;
+        }
         updateUI();
     }
 }
@@ -996,11 +1039,24 @@ function startNewGame() {
     score = 0;
     displayedScore = 0;
     linesCleared = 0;
+    comboCount = 0;
+    movesSinceLastClear = 0;
     historyStack = [];
     stopConfetti();
     
-    // Hide game over overlay
+    // Hide game over overlay and clear overlays
     document.getElementById("game-over-overlay").classList.add("hidden");
+    
+    const comboPop = document.getElementById("combo-pop-overlay");
+    if (comboPop) {
+        comboPop.classList.add("hidden");
+        comboPop.classList.remove("animate");
+    }
+    const themeBanner = document.getElementById("theme-banner-overlay");
+    if (themeBanner) {
+        themeBanner.classList.add("hidden");
+        themeBanner.classList.remove("animate");
+    }
     
     applyTheme(0);
     fillBoardDirty();
@@ -1152,17 +1208,104 @@ function updateThemePickerActive() {
     });
 }
 
-// COMBO BADGE DISPLAY
-function showComboBadge(linesCount, scoreGain) {
+// COMBO BADGE DISPLAY (updates score-adjacent small badge)
+function showComboBadge(linesCount, scoreGain, consecutiveCombo) {
     const badge = document.getElementById("combo-badge");
     if (!badge) return;
-    const multiplier = linesCount >= 4 ? "\u00d74 ULTRA!" : linesCount === 3 ? "\u00d73 COMBO!" : "\u00d72 DOUBLE!";
-    badge.textContent = `+${scoreGain.toLocaleString()} ${multiplier}`;
-    badge.className = `combo-badge combo-${linesCount >= 4 ? 'ultra' : linesCount === 3 ? 'mega' : 'double'}`;
+    
+    let multiplierText = "";
+    let comboClass = "double";
+    
+    if (consecutiveCombo >= 2) {
+        multiplierText = ` \u00d7${consecutiveCombo} SERİ!`;
+        comboClass = consecutiveCombo >= 4 ? 'ultra' : consecutiveCombo === 3 ? 'mega' : 'double';
+    } else {
+        multiplierText = linesCount >= 4 ? " \u00d74 ULTRA!" : linesCount === 3 ? " \u00d73 COMBO!" : linesCount === 2 ? " \u00d72 DOUBLE!" : "";
+        comboClass = linesCount >= 4 ? 'ultra' : linesCount === 3 ? 'mega' : 'double';
+    }
+    
+    badge.textContent = `+${scoreGain.toLocaleString()}${multiplierText}`;
+    badge.className = `combo-badge combo-${comboClass}`;
     badge.style.display = "block";
+    badge.classList.remove("hidden");
+    
     // Clear previous animation
     badge.style.animation = "none";
     badge.offsetHeight; // force reflow
     badge.style.animation = "comboPop 2s ease-out forwards";
-    setTimeout(() => { badge.classList.add("hidden"); badge.style.display = ""; }, 2100);
+    
+    // Clear previous timeout if any
+    if (badge.dataset.timeoutId) {
+        clearTimeout(parseInt(badge.dataset.timeoutId));
+    }
+    const tId = setTimeout(() => { 
+        badge.classList.add("hidden"); 
+        badge.style.display = ""; 
+    }, 2100);
+    badge.dataset.timeoutId = String(tId);
+}
+
+// TRIGGER THE PUNCHY CENTER SCREEN COMBO TEXT ANIMATION
+function triggerPunchyComboAnimation(comboIdx) {
+    const comboPop = document.getElementById("combo-pop-overlay");
+    if (!comboPop) return;
+    
+    // Set appropriate combo level styling
+    comboPop.className = "combo-pop-overlay"; // Reset classes
+    if (comboIdx === 2) {
+        comboPop.classList.add("combo-pop-2");
+    } else if (comboIdx === 3) {
+        comboPop.classList.add("combo-pop-3");
+    } else if (comboIdx === 4) {
+        comboPop.classList.add("combo-pop-4");
+    } else {
+        comboPop.classList.add("combo-pop-high");
+    }
+    
+    comboPop.textContent = `COMBO x${comboIdx}!`;
+    comboPop.classList.remove("hidden");
+    
+    // Trigger animation flow
+    comboPop.style.animation = "none";
+    comboPop.offsetHeight; // force reflow
+    comboPop.classList.add("animate");
+    
+    if (comboPop.dataset.timeoutId) {
+        clearTimeout(parseInt(comboPop.dataset.timeoutId));
+    }
+    
+    const tId = setTimeout(() => {
+        comboPop.classList.add("hidden");
+        comboPop.classList.remove("animate");
+    }, 1250);
+    comboPop.dataset.timeoutId = String(tId);
+}
+
+// TRIGGER THE SLIDE-IN THEME BANNER POPUP
+function triggerThemeBanner(themeIdx) {
+    const banner = document.getElementById("theme-banner-overlay");
+    if (!banner) return;
+    
+    const themeIcons = ["\uD83C\uDF3F", "\uD83C\uDFDB\uFE0F", "\u2744\uFE0F", "\uD83C\uDFDC\uFE0F", "\uD83D\uDC19", "\uD83C\uDF0B", "\uD83C\uDF0C", "\u26D3\uFE0F"];
+    const themeLabels = ["Orman", "Gökyüzü", "Buz", "Çöl", "Sualtı", "Volkan", "Uzay", "Zindan"];
+    
+    const name = themeLabels[themeIdx];
+    const icon = themeIcons[themeIdx];
+    
+    banner.textContent = `YENİ TEMA: ${name} ${icon}`;
+    banner.classList.remove("hidden");
+    
+    banner.style.animation = "none";
+    banner.offsetHeight; // force reflow
+    banner.classList.add("animate");
+    
+    if (banner.dataset.timeoutId) {
+        clearTimeout(parseInt(banner.dataset.timeoutId));
+    }
+    
+    const tId = setTimeout(() => {
+        banner.classList.add("hidden");
+        banner.classList.remove("animate");
+    }, 2250);
+    banner.dataset.timeoutId = String(tId);
 }

@@ -445,12 +445,12 @@ body {
     display: grid;
     gap: 4px;
     opacity: 0.95;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
 }
 .drag-clone-cell {
     border-radius: 6px;
-    background-image: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(0,0,0,0.15) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.drag-clone-cell.filled {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45) !important;
 }
 
 /* Footer & Connections */
@@ -1725,7 +1725,126 @@ body {
     background: rgba(255,255,255,0.4) !important;
 }
 
+/* ==========================================================================
+   DYNAMIC TEXT OVERLAYS (COMBO POP & THEME BANNER)
+   ========================================================================== */
+.combo-pop-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    font-style: italic;
+    color: #fff;
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px #ff007f,
+        0 0 40px #ff007f,
+        0 0 80px #ff007f;
+    -webkit-text-stroke: 1.5px #000;
+    pointer-events: none;
+    z-index: 1100;
+    opacity: 0;
+    white-space: nowrap;
+    text-align: center;
+    background: radial-gradient(circle, rgba(255,0,127,0.15) 0%, rgba(0,0,0,0) 70%);
+    padding: 40px;
+    border-radius: 50%;
+}
 
+.combo-pop-overlay.animate {
+    animation: comboPunchAnim 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
 
+.combo-pop-overlay.combo-pop-2 {
+    text-shadow: 0 0 10px #fff, 0 0 20px #3b82f6, 0 0 40px #3b82f6;
+    background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(0,0,0,0) 70%);
+}
+.combo-pop-overlay.combo-pop-3 {
+    text-shadow: 0 0 10px #fff, 0 0 20px #ec4899, 0 0 40px #ec4899;
+    background: radial-gradient(circle, rgba(236,72,153,0.15) 0%, rgba(0,0,0,0) 70%);
+}
+.combo-pop-overlay.combo-pop-4 {
+    text-shadow: 0 0 10px #fff, 0 0 20px #ffd700, 0 0 40px #ff4500;
+    background: radial-gradient(circle, rgba(255,69,0,0.2) 0%, rgba(0,0,0,0) 70%);
+}
+.combo-pop-overlay.combo-pop-high {
+    text-shadow: 0 0 10px #fff, 0 0 20px #00ff88, 0 0 40px #a855f7;
+    background: radial-gradient(circle, rgba(168,85,247,0.25) 0%, rgba(0,0,0,0) 70%);
+}
 
+@keyframes comboPunchAnim {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3) rotate(-15deg);
+        filter: blur(10px);
+    }
+    12% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.3) rotate(8deg);
+        filter: blur(0);
+    }
+    24% {
+        transform: translate(-50%, -50%) scale(0.95) rotate(-4deg);
+    }
+    70% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.0) rotate(-2deg);
+        filter: drop-shadow(0 0 15px rgba(255,255,255,0.6));
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.6) translateY(-40px) rotate(12deg);
+        filter: blur(8px);
+    }
+}
 
+.theme-banner-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scaleX(0);
+    width: 100%;
+    padding: 15px 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 20%, rgba(0,0,0,0.85) 80%, rgba(0,0,0,0) 100%);
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: #ffd700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border-top: 2px solid rgba(255, 215, 0, 0.3);
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+    pointer-events: none;
+    z-index: 1200;
+    opacity: 0;
+    white-space: nowrap;
+}
+
+.theme-banner-overlay.animate {
+    animation: themeBannerAnim 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes themeBannerAnim {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scaleX(0);
+    }
+    15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scaleX(1);
+    }
+    85% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scaleX(1);
+        filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scaleX(0);
+    }
+}
