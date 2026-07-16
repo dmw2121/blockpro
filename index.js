@@ -1374,6 +1374,34 @@ function startBackgroundMusic() {
                 osc.stop(now + duration + 0.1);
             });
             
+            // Randomly play a sparkling wind-chime pentatonic note (extremely soft C5-A5 pings)
+            if (Math.random() > 0.3) {
+                const pings = [523.25, 587.33, 659.25, 783.99, 880.00]; // C5, D5, E5, G5, A5
+                const pingFreq = pings[Math.floor(Math.random() * pings.length)];
+                
+                // Play it at a random offset within the 6 seconds
+                setTimeout(() => {
+                    try {
+                        const pt = ctx_a.currentTime;
+                        const pingOsc = ctx_a.createOscillator();
+                        const pingGain = ctx_a.createGain();
+                        
+                        pingOsc.connect(pingGain);
+                        pingGain.connect(ctx_a.destination);
+                        
+                        pingOsc.type = 'sine';
+                        pingOsc.frequency.setValueAtTime(pingFreq, pt);
+                        
+                        pingGain.gain.setValueAtTime(0, pt);
+                        pingGain.gain.linearRampToValueAtTime(0.003, pt + 0.15); // extremely quiet and soft attack
+                        pingGain.gain.exponentialRampToValueAtTime(0.0001, pt + 4.0); // long decay
+                        
+                        pingOsc.start(pt);
+                        pingOsc.stop(pt + 4.1);
+                    } catch(err) {}
+                }, 1000 + Math.random() * 3000);
+            }
+            
             currentChord = (currentChord + 1) % chords.length;
         } catch(e) {
             console.log("BG Music play error: ", e);

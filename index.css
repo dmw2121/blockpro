@@ -1736,14 +1736,14 @@ body {
     width: 100%;
     padding: 16px 0;
     font-family: 'Outfit', 'Inter', sans-serif;
-    font-size: 2.3rem;
+    font-size: 3.2rem;
     font-weight: 900;
     font-style: italic;
     color: #fff;
     text-transform: uppercase;
     letter-spacing: 4px;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
-    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 24px rgba(0, 0, 0, 0.5);
+    -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.7);
     pointer-events: none;
     z-index: 1100;
     opacity: 0;
@@ -1753,6 +1753,11 @@ body {
     border-top: 3px solid rgba(255, 255, 255, 0.35);
     border-bottom: 3px solid rgba(255, 255, 255, 0.35);
     will-change: transform, opacity;
+}
+
+/* Hide the undo button */
+#undo-btn {
+    display: none !important;
 }
 
 .combo-pop-overlay.animate {
