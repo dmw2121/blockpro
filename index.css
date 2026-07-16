@@ -2318,3 +2318,89 @@ input:checked + .slider:before {
 .premium-close-btn:active {
     transform: translateY(1px);
 }
+
+/* ==========================================================================
+   UNIFIED CONTRAST OVERRIDES FOR LIGHT THEME OVERLAYS
+   ========================================================================== */
+.start-card, .settings-card, .premium-card, .go-card {
+    background: rgba(14, 17, 27, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    color: #ffffff !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Ensure child elements in light themes keep high contrast against the dark card */
+.theme-1 .start-card *:not(.start-logo):not(.premium-title),
+.theme-1 .settings-card *,
+.theme-1 .premium-card *:not(.premium-title),
+.theme-1 .go-card *,
+.theme-2 .start-card *:not(.start-logo):not(.premium-title),
+.theme-2 .settings-card *,
+.theme-2 .premium-card *:not(.premium-title),
+.theme-2 .go-card *,
+.theme-3 .start-card *:not(.start-logo):not(.premium-title),
+.theme-3 .settings-card *,
+.theme-3 .premium-card *:not(.premium-title),
+.theme-3 .go-card * {
+    color: #ffffff;
+}
+
+/* Maintain beautiful gradients for logos and special badge texts */
+.start-logo {
+    background: linear-gradient(135deg, #ffffff 0%, #a855f7 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    display: inline-block;
+}
+
+.premium-title {
+    background: linear-gradient(135deg, #ffd700 0%, #ffffff 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    display: inline-block;
+}
+
+/* Label and description sub-colors */
+.settings-option .option-label, .settings-option-vertical .option-label {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.start-description, .premium-description, .go-motivation, .go-subtitle {
+    color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.start-score-label, .go-score-label, .go-stat-lbl {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.start-score-val, .go-score-val, .go-stat-val {
+    color: #ffd700 !important;
+}
+
+/* Reset buttons style to prevent light-theme button color bleeding */
+.start-btn-primary, .premium-buy-btn {
+    color: #0d1117 !important;
+    font-weight: 800 !important;
+}
+
+.start-btn-primary {
+    background: linear-gradient(135deg, #00ff88 0%, #00bfff 100%) !important;
+}
+
+.premium-buy-btn {
+    background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%) !important;
+}
+
+.danger-btn {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.start-btn-secondary, .settings-close-btn, .premium-close-btn {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
