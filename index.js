@@ -1188,7 +1188,7 @@ function initGame() {
             if (!musicEnabled) {
                 // Clear chords loop immediately
                 if (chordsInterval) {
-                    clearInterval(chordsInterval);
+                    clearTimeout(chordsInterval);
                     chordsInterval = null;
                 }
                 musicPlaying = false;
@@ -1451,95 +1451,86 @@ function triggerThemeBanner(themeIdx) {
     banner.dataset.timeoutId = String(tId);
 }
 
-// BACKGROUND MUSIC ENGINE (ambient soft loops)
+// BACKGROUND MUSIC ENGINE (ambient cheerful arpeggios)
 let musicPlaying = false;
-let chordsInterval = null;
+let chordsInterval = null; // Used as the timeout tracker
+let currentStep = 0;
 
 function startBackgroundMusic() {
     if (musicPlaying) return;
     musicPlaying = true;
+    currentStep = 0;
     
-    // Play a loop of soft, relaxing ambient chords (Cmaj7 -> Am7 -> Fmaj7 -> G6)
-    const chords = [
-        [130.81, 164.81, 196.00, 246.94], // Cmaj7
-        [110.00, 130.81, 164.81, 196.00], // Am7
-        [87.31, 130.81, 174.61, 220.00],  // Fmaj7
-        [98.00, 146.83, 196.00, 246.94]   // G6
+    // Cheerful progression: C -> G -> Am -> F (Music Box arpeggios)
+    const melody = [
+        // C Major (cheerful)
+        { freq: 130.81, gain: 0.005, dur: 0.8 }, // C3
+        { freq: 196.00, gain: 0.004, dur: 0.8 }, // G3
+        { freq: 329.63, gain: 0.004, dur: 0.8 }, // E4
+        { freq: 261.63, gain: 0.004, dur: 0.8 }, // C4
+        
+        // G Major (cheerful)
+        { freq: 98.00,  gain: 0.005, dur: 0.8 }, // G2
+        { freq: 146.83, gain: 0.004, dur: 0.8 }, // D3
+        { freq: 293.66, gain: 0.004, dur: 0.8 }, // D4
+        { freq: 196.00, gain: 0.004, dur: 0.8 }, // G3
+        
+        // A Minor (gentle contrast)
+        { freq: 110.00, gain: 0.005, dur: 0.8 }, // A2
+        { freq: 164.81, gain: 0.004, dur: 0.8 }, // E3
+        { freq: 261.63, gain: 0.004, dur: 0.8 }, // C4
+        { freq: 220.00, gain: 0.004, dur: 0.8 }, // A3
+        
+        // F Major (resolving happily)
+        { freq: 87.31,  gain: 0.005, dur: 0.8 }, // F2
+        { freq: 130.81, gain: 0.004, dur: 0.8 }, // C3
+        { freq: 349.23, gain: 0.004, dur: 0.8 }, // F4
+        { freq: 261.63, gain: 0.004, dur: 0.8 }  // C4
     ];
     
-    let currentChord = 0;
+    const stepDuration = 550; // ms per step (approx 110 BPM)
     
-    function playNextChord() {
+    function playStep() {
+        if (!musicPlaying) return;
+        
         try {
             AudioEngine.initContext();
             const ctx_a = AudioEngine.getContext();
-            if (!ctx_a || ctx_a.state === 'suspended') return;
-            
-            const now = ctx_a.currentTime;
-            const duration = 6.0; // Play chord for 6 seconds
-            const freqs = chords[currentChord];
-            
-            freqs.forEach((freq) => {
+            if (ctx_a && ctx_a.state !== 'suspended') {
+                const now = ctx_a.currentTime;
+                const note = melody[currentStep];
+                
                 const osc = ctx_a.createOscillator();
                 const gainNode = ctx_a.createGain();
                 const filter = ctx_a.createBiquadFilter();
                 
                 filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(320, now); // Low cutoff for warm ambient sound
+                filter.frequency.setValueAtTime(380, now); // soft warm cut to sit quietly in the back
                 
                 osc.connect(gainNode);
                 gainNode.connect(filter);
                 filter.connect(ctx_a.destination);
                 
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, now);
+                osc.frequency.setValueAtTime(note.freq, now);
                 
-                // Slow attack and release for absolute smoothness
+                // Extremely quiet and gentle fade in / fade out
                 gainNode.gain.setValueAtTime(0, now);
-                gainNode.gain.linearRampToValueAtTime(0.012, now + 2.0); // Extremely quiet background gain
-                gainNode.gain.setValueAtTime(0.012, now + duration - 2.0);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                gainNode.gain.linearRampToValueAtTime(note.gain, now + 0.08); // slow soft attack
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + note.dur); // long release
                 
                 osc.start(now);
-                osc.stop(now + duration + 0.1);
-            });
-            
-            // Randomly play a sparkling wind-chime pentatonic note (extremely soft C5-A5 pings)
-            if (Math.random() > 0.3) {
-                const pings = [523.25, 587.33, 659.25, 783.99, 880.00]; // C5, D5, E5, G5, A5
-                const pingFreq = pings[Math.floor(Math.random() * pings.length)];
-                
-                // Play it at a random offset within the 6 seconds
-                setTimeout(() => {
-                    try {
-                        const pt = ctx_a.currentTime;
-                        const pingOsc = ctx_a.createOscillator();
-                        const pingGain = ctx_a.createGain();
-                        
-                        pingOsc.connect(pingGain);
-                        pingGain.connect(ctx_a.destination);
-                        
-                        pingOsc.type = 'sine';
-                        pingOsc.frequency.setValueAtTime(pingFreq, pt);
-                        
-                        pingGain.gain.setValueAtTime(0, pt);
-                        pingGain.gain.linearRampToValueAtTime(0.003, pt + 0.15); // extremely quiet and soft attack
-                        pingGain.gain.exponentialRampToValueAtTime(0.0001, pt + 4.0); // long decay
-                        
-                        pingOsc.start(pt);
-                        pingOsc.stop(pt + 4.1);
-                    } catch(err) {}
-                }, 1000 + Math.random() * 3000);
+                osc.stop(now + note.dur + 0.1);
             }
-            
-            currentChord = (currentChord + 1) % chords.length;
         } catch(e) {
-            console.log("BG Music play error: ", e);
+            console.log("Music step play error:", e);
         }
+        
+        currentStep = (currentStep + 1) % melody.length;
+        chordsInterval = setTimeout(playStep, stepDuration);
     }
     
-    playNextChord();
-    chordsInterval = setInterval(playNextChord, 6000);
+    playStep();
 }
 
 // User Interaction Trigger to comply with modern browser autoplay policies
