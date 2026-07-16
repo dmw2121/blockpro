@@ -200,6 +200,59 @@
         </div>
     </div>
 
+    <!-- Payment Screen Overlay -->
+    <div id="payment-overlay" class="premium-overlay hidden">
+        <div class="premium-card" style="max-width: 400px;">
+            <div class="premium-badge">🔐 GÜVENLİ ÖDEME</div>
+            <h2 class="premium-title">Premium Satın Al</h2>
+            <p class="premium-description">Tüm kilitli temalara ve sınırsız dinlendirici zen müziklerine anında erişim.</p>
+            
+            <!-- Interactive Credit Card Visual -->
+            <div class="card-visual">
+                <div class="card-chip"></div>
+                <div class="card-number-display" id="card-num-disp">4111 2222 3333 4444</div>
+                <div class="card-details-row">
+                    <div class="card-holder-display" id="card-name-disp">CAN YILMAZ</div>
+                    <div class="card-expiry-display" id="card-exp-disp">12/30</div>
+                </div>
+            </div>
+            
+            <!-- Payment Input Fields -->
+            <div class="payment-form" id="payment-form" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                <div class="form-group">
+                    <label class="form-label">Kart Sahibi</label>
+                    <input type="text" id="pay-cardholder" class="form-input" placeholder="Ad Soyad" value="Can Yılmaz">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kart Numarası</label>
+                    <input type="text" id="pay-cardnumber" class="form-input" placeholder="4111 2222 3333 4444" maxlength="19" value="4111 2222 3333 4444">
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Son Kullanma</label>
+                        <input type="text" id="pay-expiry" class="form-input" placeholder="AA/YY" maxlength="5" value="12/30">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">CVC</label>
+                        <input type="password" id="pay-cvc" class="form-input" placeholder="***" maxlength="3" value="123">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator (hidden by default) -->
+            <div id="payment-loader" class="payment-loader hidden">
+                <div class="spinner"></div>
+                <p style="margin-top: 12px; font-size: 0.9rem; color: #ffd700; font-weight: 600;">Ödeme doğrulanıyor...</p>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="premium-buttons" id="payment-buttons" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+                <button id="submit-payment-btn" class="premium-buy-btn">💳 19.99 TL ÖDEMEYİ TAMAMLA</button>
+                <button id="cancel-payment-btn" class="premium-close-btn">İPTAL ET</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Floating visual clone during dragging -->
     <div id="drag-clone" class="drag-clone hidden"></div>
 

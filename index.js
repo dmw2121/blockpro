@@ -1236,16 +1236,96 @@ function initGame() {
         });
     }
     
-    // Premium Buy Button
+    // Premium Buy Button (Opens payment overlay checkout flow)
     const buyPremiumBtn = document.getElementById('buy-premium-btn');
     if (buyPremiumBtn) {
         buyPremiumBtn.addEventListener('click', () => {
-            premiumUnlocked = true;
-            localStorage.setItem('blockmaster_premium', 'true');
             document.getElementById('premium-overlay').classList.add('hidden');
-            // Re-render theme picker so padlocks disappear
-            initThemePicker();
-            alert("Tebrikler! Premium üyelik satın alındı. Tüm temaların kilidi açıldı! \uD83D\uDC51");
+            document.getElementById('payment-overlay').classList.remove('hidden');
+        });
+    }
+
+    // Payment Form card sync listeners
+    const payCardholder = document.getElementById('pay-cardholder');
+    const cardNameDisp = document.getElementById('card-name-disp');
+    if (payCardholder && cardNameDisp) {
+        payCardholder.addEventListener('input', (e) => {
+            cardNameDisp.textContent = e.target.value.trim().toUpperCase() || "CAN YILMAZ";
+        });
+    }
+
+    const payCardnumber = document.getElementById('pay-cardnumber');
+    const cardNumDisp = document.getElementById('card-num-disp');
+    if (payCardnumber && cardNumDisp) {
+        payCardnumber.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, '');
+            let formatted = val.match(/.{1,4}/g)?.join(' ') || "";
+            e.target.value = formatted.substring(0, 19);
+            cardNumDisp.textContent = e.target.value || "•••• •••• •••• ••••";
+        });
+    }
+
+    const payExpiry = document.getElementById('pay-expiry');
+    const cardExpDisp = document.getElementById('card-exp-disp');
+    if (payExpiry && cardExpDisp) {
+        payExpiry.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length > 2) {
+                e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+            } else {
+                e.target.value = val;
+            }
+            cardExpDisp.textContent = e.target.value || "AA/YY";
+        });
+    }
+
+    // Cancel Payment Button
+    const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+    if (cancelPaymentBtn) {
+        cancelPaymentBtn.addEventListener('click', () => {
+            document.getElementById('payment-overlay').classList.add('hidden');
+        });
+    }
+
+    // Submit Payment Button (Mock transaction flow)
+    const submitPaymentBtn = document.getElementById('submit-payment-btn');
+    if (submitPaymentBtn) {
+        submitPaymentBtn.addEventListener('click', () => {
+            const formGroup = document.getElementById('payment-form');
+            const buttonsGroup = document.getElementById('payment-buttons');
+            const loaderGroup = document.getElementById('payment-loader');
+            
+            // Validate basic inputs
+            if (!payCardholder.value.trim() || !payCardnumber.value.trim() || !payExpiry.value.trim()) {
+                alert("Lütfen kart bilgilerini eksiksiz doldurunuz.");
+                return;
+            }
+            
+            // Show processing screen
+            formGroup.classList.add('hidden');
+            buttonsGroup.classList.add('hidden');
+            loaderGroup.classList.remove('hidden');
+            
+            setTimeout(() => {
+                // Unlock premium
+                premiumUnlocked = true;
+                localStorage.setItem('blockmaster_premium', 'true');
+                
+                // Hide modal and restore layout states
+                document.getElementById('payment-overlay').classList.add('hidden');
+                formGroup.classList.remove('hidden');
+                buttonsGroup.classList.remove('hidden');
+                loaderGroup.classList.add('hidden');
+                
+                // Refresh locks
+                initThemePicker();
+                
+                // Congratulatory effect
+                AudioEngine.ultra();
+                startConfetti();
+                
+                alert("Tebrikler! Ödeme başarıyla tamamlandı. Premium üyelik aktifleştirildi! Tüm temaların kilidi açıldı! \uD83D\uDC51");
+            }, 2500);
         });
     }
 

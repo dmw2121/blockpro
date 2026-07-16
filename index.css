@@ -2404,3 +2404,110 @@ input:checked + .slider:before {
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     color: #ffffff !important;
 }
+
+/* Interactive Credit Card Styling */
+.card-visual {
+    background: linear-gradient(135deg, #1d182e 0%, #0c0a13 100%) !important;
+    border: 1px solid rgba(255, 215, 0, 0.25) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    text-align: left !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+    position: relative !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+    margin-bottom: 8px !important;
+    box-sizing: border-box !important;
+}
+
+.card-chip {
+    width: 32px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffd700 0%, #b8901b 100%) !important;
+    border-radius: 5px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+.card-number-display {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 1.25rem !important;
+    letter-spacing: 2px !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6) !important;
+    margin: 4px 0 !important;
+}
+
+.card-details-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 0.72rem !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    text-transform: uppercase !important;
+    font-family: 'Outfit', sans-serif !important;
+    letter-spacing: 1px !important;
+}
+
+.card-holder-display {
+    font-weight: 600 !important;
+}
+
+.card-expiry-display {
+    font-weight: 600 !important;
+}
+
+/* Payment Inputs */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-label {
+    font-size: 0.72rem !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+}
+
+.form-input {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+    color: #ffffff !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 0.9rem !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.2s, background-color 0.2s !important;
+}
+
+.form-input:focus {
+    border-color: #ffd700 !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Payment Spinner and Loader */
+.payment-loader {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 24px 0 !important;
+}
+
+.spinner {
+    width: 44px !important;
+    height: 44px !important;
+    border: 4px solid rgba(255, 215, 0, 0.08) !important;
+    border-top-color: #ffd700 !important;
+    border-radius: 50% !important;
+    animation: paySpinner 1s linear infinite !important;
+}
+
+@keyframes paySpinner {
+    to { transform: rotate(360deg); }
+}
