@@ -1381,10 +1381,22 @@ window.addEventListener("resize", resizeCanvas);
 window.addEventListener("DOMContentLoaded", initGame);
 
 // BOTTOM THEME PICKER FUNCTIONS
+const THEME_SCORE_REQUIREMENTS = {
+    2: 1000000,   // Buz: 1M
+    3: 2000000,   // Çöl: 2M
+    4: 3000000,   // Sualtı: 3M
+    5: 4000000,   // Volkan: 4M
+    6: 5000000,   // Uzay: 5M
+    7: 10000000   // Zindan: 10M
+};
+
 function isThemeUnlocked(index) {
     if (index === 0 || index === 1) return true;
     if (premiumUnlocked) return true;
-    if (highScore >= 1000000) return true;
+    
+    const requiredScore = THEME_SCORE_REQUIREMENTS[index];
+    if (requiredScore && highScore >= requiredScore) return true;
+    
     return false;
 }
 
@@ -1407,6 +1419,15 @@ function initThemePicker() {
         
         btn.addEventListener("click", () => {
             if (!isThemeUnlocked(i)) {
+                // Determine theme unlock text dynamically
+                const reqScore = THEME_SCORE_REQUIREMENTS[i];
+                const scoreStr = reqScore >= 1000000 ? `${reqScore / 1000000}.000.000` : reqScore.toLocaleString();
+                
+                const scoreTextSpan = document.getElementById('premium-needed-score');
+                if (scoreTextSpan) {
+                    scoreTextSpan.textContent = scoreStr;
+                }
+                
                 // Open premium upgrade modal
                 document.getElementById('premium-overlay').classList.remove('hidden');
                 return;
