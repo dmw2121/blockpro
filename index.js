@@ -1214,6 +1214,15 @@ function initGame() {
             document.getElementById('settings-overlay').classList.add('hidden');
         });
     }
+
+    // Settings Premium Upgrade Button
+    const settingsPremiumBtn = document.getElementById('settings-premium-btn');
+    if (settingsPremiumBtn) {
+        settingsPremiumBtn.addEventListener('click', () => {
+            document.getElementById('settings-overlay').classList.add('hidden');
+            document.getElementById('premium-overlay').classList.remove('hidden');
+        });
+    }
     
     // Start Game Button
     const startGameBtn = document.getElementById('start-game-btn');
@@ -1319,6 +1328,7 @@ function initGame() {
                 
                 // Refresh locks
                 initThemePicker();
+                updateSettingsPremiumUI();
                 
                 // Congratulatory effect
                 AudioEngine.ultra();
@@ -1376,6 +1386,7 @@ function initGame() {
     });
     
     // Bottom Theme picker scrollable bar initialization
+    updateSettingsPremiumUI();
     initThemePicker();
 }
 
@@ -1532,6 +1543,20 @@ function updateThemePickerActive() {
             btn.classList.remove("active");
         }
     });
+}
+
+function updateSettingsPremiumUI() {
+    const upgradeBtn = document.getElementById('settings-premium-btn');
+    const activeBadge = document.getElementById('settings-premium-active-badge');
+    if (upgradeBtn && activeBadge) {
+        if (premiumUnlocked) {
+            upgradeBtn.classList.add('hidden');
+            activeBadge.classList.remove('hidden');
+        } else {
+            upgradeBtn.classList.remove('hidden');
+            activeBadge.classList.add('hidden');
+        }
+    }
 }
 
 // COMBO BADGE DISPLAY (updates score-adjacent small badge)
