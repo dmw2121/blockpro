@@ -264,6 +264,24 @@ function generateNewDockShapes() {
             colorIndex: randomColor
         };
     }
+    
+    // Ensure at least one shape is placeable if possible
+    const anyPlaceable = dockShapes.some(shape => canPlaceShape(shape.matrix));
+    if (!anyPlaceable) {
+        const placeableShapes = SHAPES.filter(shape => canPlaceShape(shape.matrix));
+        if (placeableShapes.length > 0) {
+            // Replace the first slot with a placeable shape
+            const randIdx = Math.floor(Math.random() * placeableShapes.length);
+            const shapeDef = placeableShapes[randIdx];
+            const randomColor = 1 + Math.floor(Math.random() * 4);
+            dockShapes[0] = {
+                matrix: shapeDef.matrix,
+                name: shapeDef.name,
+                colorIndex: randomColor
+            };
+        }
+    }
+    
     renderDock();
 }
 

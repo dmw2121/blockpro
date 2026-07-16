@@ -2332,15 +2332,15 @@ input:checked + .slider:before {
 }
 
 /* Ensure child elements in light themes keep high contrast against the dark card */
-.theme-1 .start-card *:not(.start-logo):not(.premium-title),
+.theme-1 .start-card *:not(.start-logo):not(.premium-title):not(.logo-badge),
 .theme-1 .settings-card *,
 .theme-1 .premium-card *:not(.premium-title),
 .theme-1 .go-card *,
-.theme-2 .start-card *:not(.start-logo):not(.premium-title),
+.theme-2 .start-card *:not(.start-logo):not(.premium-title):not(.logo-badge),
 .theme-2 .settings-card *,
 .theme-2 .premium-card *:not(.premium-title),
 .theme-2 .go-card *,
-.theme-3 .start-card *:not(.start-logo):not(.premium-title),
+.theme-3 .start-card *:not(.start-logo):not(.premium-title):not(.logo-badge),
 .theme-3 .settings-card *,
 .theme-3 .premium-card *:not(.premium-title),
 .theme-3 .go-card * {
