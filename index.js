@@ -63,6 +63,7 @@ let premiumUnlocked = false;
 let dockShapes = [null, null, null];
 let historyStack = []; // Max 5 items
 let draggingState = null;
+let hasNoMoves = false;
 
 // PARTICLE ENGINE (DORMANT CANVAS ENGINE)
 const canvas = document.getElementById("effects-canvas");
@@ -264,6 +265,30 @@ const highScoreEl = document.getElementById("high-score");
 const linesClearedEl = document.getElementById("lines-cleared");
 const undoBtn = document.getElementById("undo-btn");
 const restartBtn = document.getElementById("restart-btn");
+const dragCloneEl = document.getElementById("drag-clone");
+
+// DOM Cache
+const cellElements = Array(8).fill(null).map(() => Array(8).fill(null));
+
+// Static theme colors to avoid expensive getComputedStyle calls
+const THEME_COLORS = [
+    // Theme 0: Jungle Temple (Orman)
+    { 1: "#00cbf7", 2: "#f43f5e", 3: "#10b981", 4: "#a855f7" },
+    // Theme 1: Sky Slate (Gökyüzü)
+    { 1: "#00d2ff", 2: "#ff4d79", 3: "#00e676", 4: "#ba68c8" },
+    // Theme 2: Frost Blue (Buz)
+    { 1: "#26c6da", 2: "#ff5252", 3: "#66bb6a", 4: "#ab47bc" },
+    // Theme 3: Warm Sand (Çöl)
+    { 1: "#3a86c8", 2: "#e76f51", 3: "#2a9d8f", 4: "#9b5de5" },
+    // Theme 4: Undersea Ruins (Sualtı)
+    { 1: "#00f0ff", 2: "#ff3366", 3: "#00ff88", 4: "#d946ef" },
+    // Theme 5: Volcanic Cave (Volkan)
+    { 1: "#3f51b5", 2: "#f44336", 3: "#4caf50", 4: "#9c27b0" },
+    // Theme 6: Cosmic Void (Uzay)
+    { 1: "#00e5ff", 2: "#ff1744", 3: "#00e676", 4: "#d500f9" },
+    // Theme 7: Medieval Dungeon (Zindan)
+    { 1: "#00b0ff", 2: "#f50057", 3: "#00e676", 4: "#ab47bc" }
+];
 
 // INITIALIZE BOARD GRID DOM
 function initBoardDOM() {
@@ -275,26 +300,28 @@ function initBoardDOM() {
             cell.dataset.row = r;
             cell.dataset.col = c;
             boardEl.appendChild(cell);
+            cellElements[r][c] = cell;
         }
     }
 }
 
 // RENDER BOARD MATRIX TO DOM
 function renderBoard() {
-    const cells = boardEl.querySelectorAll(".grid-cell");
-    cells.forEach(cell => {
-        const r = parseInt(cell.dataset.row);
-        const c = parseInt(cell.dataset.col);
-        const val = board[r][c];
-        
-        cell.className = "grid-cell"; // reset class
-        cell.style.backgroundColor = "";
-        
-        if (val > 0) {
-            cell.classList.add("filled", `block-color-${val}`);
-            cell.style.backgroundColor = `var(--theme-color-${val})`;
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const cell = cellElements[r][c];
+            if (!cell) continue;
+            const val = board[r][c];
+            
+            cell.className = "grid-cell"; // reset class
+            cell.style.backgroundColor = "";
+            
+            if (val > 0) {
+                cell.classList.add("filled", `block-color-${val}`);
+                cell.style.backgroundColor = `var(--theme-color-${val})`;
+            }
         }
-    });
+    }
 }
 
 // 3. DIRTY START ALGORITHM (Custom puzzle layout to allow full clear with 2x2 shape)
@@ -463,6 +490,22 @@ function performUndo() {
     themeIndex = prevState.themeIndex;
     comboCount = prevState.comboCount;
     movesSinceLastClear = prevState.movesSinceLastClear;
+    
+    hasNoMoves = false;
+    const shapesDock = document.getElementById('shapes-dock');
+    if (shapesDock) {
+        shapesDock.classList.remove('no-moves-warning');
+        shapesDock.classList.remove('game-over-fade');
+    }
+    const boardGrid = document.getElementById('game-board');
+    if (boardGrid) {
+        boardGrid.classList.remove('game-over-active');
+        boardGrid.classList.remove('game-over-fade');
+    }
+    const headerEl = document.querySelector('.game-header');
+    if (headerEl) {
+        headerEl.classList.remove('game-over-fade');
+    }
     
     applyTheme(themeIndex);
     renderBoard();
@@ -641,12 +684,6 @@ function updateParticles() {
 
         ctx.save();
         ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = p.color;
-        if (p.trail) {
-            // Glowing star shape for mega bursts
-            ctx.shadowBlur = p.size * 3;
-            ctx.shadowColor = p.color;
-        }
         
         // Translate to particle center and rotate
         ctx.translate(p.x, p.y);
@@ -654,7 +691,16 @@ function updateParticles() {
             ctx.rotate(p.rotation);
         }
         
+        if (p.trail) {
+            // Draw a larger semi-transparent background square instead of using expensive shadowBlur
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.alpha * 0.35;
+            ctx.fillRect(-p.size * 1.5, -p.size * 1.5, p.size * 3, p.size * 3);
+            ctx.globalAlpha = p.alpha;
+        }
+        
         // Draw square/block debris particle
+        ctx.fillStyle = p.color;
         ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2);
         
         // Add a subtle 3D highlight edge to each block debris particle
@@ -714,97 +760,126 @@ function checkGameOver() {
     }
     
     if (!canPlaceAny && dockShapes.some(s => s !== null)) {
-        const isNewRecord = score > highScore;
-        if (isNewRecord) {
-            highScore = score;
-            localStorage.setItem('blockmaster_highscore', String(highScore));
-        }
-        
-        AudioEngine.gameOver();
-        
-        // Trigger the sad crumble dispersal and fade effects on the board
-        const boardGrid = document.getElementById('game-board');
-        if (boardGrid) {
-            boardGrid.classList.add('game-over-fade');
-        }
+        hasNoMoves = true;
         const shapesDock = document.getElementById('shapes-dock');
         if (shapesDock) {
-            shapesDock.classList.add('game-over-fade');
+            shapesDock.classList.add('no-moves-warning');
         }
-        const headerEl = document.querySelector('.game-header');
-        if (headerEl) {
-            headerEl.classList.add('game-over-fade');
+    } else {
+        hasNoMoves = false;
+        const shapesDock = document.getElementById('shapes-dock');
+        if (shapesDock) {
+            shapesDock.classList.remove('no-moves-warning');
         }
-        
-        // Apply disperse classes with random parameters to all filled cells
-        const filledCells = boardEl.querySelectorAll('.grid-cell.filled');
-        filledCells.forEach(cell => {
-            const randX = (Math.random() - 0.5) * 180; // drift left/right
-            const randY = 300 + Math.random() * 250;   // fall down (gravity)
-            const randR = (Math.random() - 0.5) * 450; // spin random degrees
-            const delay = Math.random() * 0.4;         // staggered fall delay
-            
-            cell.style.setProperty('--disperse-x', `${randX}px`);
-            cell.style.setProperty('--disperse-y', `${randY}px`);
-            cell.style.setProperty('--disperse-r', `${randR}deg`);
-            cell.style.animationDelay = `${delay}s`;
-            cell.classList.add('disperse');
-        });
-        
-        // Pick a random philosophical motivation quote
-        const MOTIVATIONAL_QUOTES = [
-            "\"Yenilgi, daha zekice başlama fırsatından başka bir şey değildir.\" — Henry Ford",
-            "\"Düşmek hata değildir; düşüp kalmak hatadır.\" — Aristoteles",
-            "\"Engeller, gözünüzü hedeften ayırdığınızda gördüğünüz korkunç şeylerdir.\" — Henry Ford",
-            "\"Hayat bisiklete binmek gibidir, dengeyi korumak için hareket etmeye devam etmelisin.\" — Albert Einstein",
-            "\"En büyük zaferimiz hiç düşmemek değil, her düştüğümüzde ayağa kalkmaktır.\" — Konfüçyüs",
-            "\"Zorluklar, yetenekleri ortaya çıkarır.\" — Horatius",
-            "\"Hiçbir şey bitmiş değildir, ta ki sen vazgeçene kadar.\" — Anonim",
-            "\"Yara, ışığın içeri girdiği yerdir.\" — Mevlana",
-            "\"Gideceği limanı bilmeyene hiçbir rüzgardan fayda gelmez.\" — Seneca",
-            "\"Bugün yapacağın her hamle, yarının temelidir.\" — Zen Felsefesi",
-            "\"Karanlığı lanetlemektense bir mum yakın.\" — Konfüçyüs",
-            "\"Bir kez daha dene. Bir kez daha yenil. Daha iyi yenil.\" — Samuel Beckett",
-            "\"Başarı, hevesini kaybetmeden başarısızlıktan başarısızlığa koşmaktır.\" — Winston Churchill",
-            "\"Gelecek, bugünden hazırlananlara aittir.\" — Malcolm X"
-        ];
-        const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
-        const motivationEl = document.getElementById('go-motivation');
-        if (motivationEl) {
-            motivationEl.textContent = randomQuote;
-        }
-        
-        // Fill game over screen
-        document.getElementById('game-over-score').textContent = score;
-        document.getElementById('game-over-high').textContent = highScore;
-        document.getElementById('go-lines').textContent = linesCleared;
-        
-        const newRecordEl = document.getElementById('go-new-record');
-        if (isNewRecord) {
-            newRecordEl.classList.remove('hidden');
-            document.getElementById('go-emoji').textContent = '🏆';
-            document.getElementById('go-subtitle').textContent = 'Yeni Rekor!';
-            // launch confetti for new record
-            startConfetti();
-        } else {
-            newRecordEl.classList.add('hidden');
-            document.getElementById('go-emoji').textContent = '🥺';
-            document.getElementById('go-subtitle').textContent = 'Daha fazla hamle kalmadı...';
-            stopConfetti();
-        }
-        
-        // Stagger showing the game-over dialog after dispersion finishes (3.6s delay)
-        setTimeout(() => {
-            document.getElementById('game-over-overlay').classList.remove('hidden');
-        }, 3600);
     }
+}
+
+function triggerGameOverSequence() {
+    if (document.getElementById('game-over-overlay').classList.contains('hidden') === false) return;
+
+    const isNewRecord = score > highScore;
+    if (isNewRecord) {
+        highScore = score;
+        localStorage.setItem('blockmaster_highscore', String(highScore));
+    }
+    
+    AudioEngine.gameOver();
+    
+    const boardGrid = document.getElementById('game-board');
+    if (boardGrid) {
+        boardGrid.classList.add('game-over-active');
+    }
+    const shapesDock = document.getElementById('shapes-dock');
+    if (shapesDock) {
+        shapesDock.classList.add('game-over-fade');
+        shapesDock.classList.remove('no-moves-warning');
+    }
+    const headerEl = document.querySelector('.game-header');
+    if (headerEl) {
+        headerEl.classList.add('game-over-fade');
+    }
+    
+    // Cascading fill of the grid cells with game-over-block visual
+    const cells = boardEl.querySelectorAll('.grid-cell');
+    cells.forEach(cell => {
+        const r = parseInt(cell.dataset.row);
+        const c = parseInt(cell.dataset.col);
+        
+        const delay = r * 150 + c * 25;
+        setTimeout(() => {
+            cell.className = "grid-cell game-over-block";
+            cell.style.backgroundColor = "";
+            
+            // Short click SFX on fill
+            if (sfxEnabled && c === 0) {
+                try {
+                    const ctx = AudioEngine.getContext();
+                    if (ctx) {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(140 - r * 8, ctx.currentTime);
+                        gain.gain.setValueAtTime(0.015, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.08);
+                    }
+                } catch(e) {}
+            }
+        }, delay);
+    });
+    
+    const MOTIVATIONAL_QUOTES = [
+        "\"Yenilgi, daha zekice başlama fırsatından başka bir şey değildir.\" — Henry Ford",
+        "\"Düşmek hata değildir; düşüp kalmak hatadır.\" — Aristoteles",
+        "\"Engeller, gözünüzü hedeften ayırdığınızda gördüğünüz korkunç şeylerdir.\" — Henry Ford",
+        "\"Hayat bisiklete binmek gibidir, dengeyi korumak için hareket etmeye devam etmelisin.\" — Albert Einstein",
+        "\"En büyük zaferimiz hiç düşmemek değil, her düştüğümüzde ayağa kalkmaktır.\" — Konfüçyüs",
+        "\"Zorluklar, yetenekleri ortaya çıkarır.\" — Horatius",
+        "\"Hiçbir şey bitmiş değildir, ta ki sen vazgeçene kadar.\" — Anonim",
+        "\"Yara, ışığın içeri girdiği yerdir.\" — Mevlana",
+        "\"Gideceği limanı bilmeyene hiçbir rüzgardan fayda gelmez.\" — Seneca",
+        "\"Bugün yapacağın her hamle, yarının temelidir.\" — Zen Felsefesi",
+        "\"Karanlığı lanetlemektense bir mum yakın.\" — Konfüçyüs",
+        "\"Bir kez daha dene. Bir kez daha yenil. Daha iyi yenil.\" — Samuel Beckett",
+        "\"Başarı, hevesini kaybetmeden başarısizliktan başarısızlığa koşmaktır.\" — Winston Churchill",
+        "\"Gelecek, bugünden hazırlananlara aittir.\" — Malcolm X"
+    ];
+    const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+    const motivationEl = document.getElementById('go-motivation');
+    if (motivationEl) {
+        motivationEl.textContent = randomQuote;
+    }
+    
+    document.getElementById('game-over-score').textContent = score;
+    document.getElementById('game-over-high').textContent = highScore;
+    document.getElementById('go-lines').textContent = linesCleared;
+    
+    const newRecordEl = document.getElementById('go-new-record');
+    if (isNewRecord) {
+        newRecordEl.classList.remove('hidden');
+        document.getElementById('go-emoji').textContent = '🏆';
+        document.getElementById('go-subtitle').textContent = 'Yeni Rekor!';
+        startConfetti();
+    } else {
+        newRecordEl.classList.add('hidden');
+        document.getElementById('go-emoji').textContent = '🥺';
+        document.getElementById('go-subtitle').textContent = 'Daha fazla hamle kalmadı...';
+        stopConfetti();
+    }
+    
+    setTimeout(() => {
+        document.getElementById('game-over-overlay').classList.remove('hidden');
+    }, 2400);
 }
 
 
 // FLOATING SCORE POPUPS (spawns gold points text that floats up and fades out)
 function spawnFloatingText(text, row, col) {
     const boardContainer = document.querySelector(".board-container");
-    const cellEl = boardEl.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    const cellEl = cellElements[row] ? cellElements[row][col] : null;
     if (!boardContainer || !cellEl) return;
     
     const boardRect = boardEl.getBoundingClientRect();
@@ -897,7 +972,7 @@ function checkLinesAndClear() {
             const [r, c] = key.split(",").map(Number);
             const val = board[r][c];
             if (val > 0) {
-                const colorStr = getComputedStyle(document.body).getPropertyValue(`--theme-color-${val}`).trim() || "#ffffff";
+                const colorStr = (THEME_COLORS[themeIndex] && THEME_COLORS[themeIndex][val]) || "#ffffff";
                 const count = isMegaClear ? 2 : 1;
                 const sizeMult = linesCount >= 4 ? 2.0 : linesCount >= 3 ? 1.5 : 1.0;
                 
@@ -1069,12 +1144,16 @@ function checkPlacementValidity(shape, grabR, grabC, hoverR, hoverC) {
 
 // HIGHLIGHT BOARD GRID HOVERS (with ghost block color preview)
 function clearBoardHighlights() {
-    boardEl.querySelectorAll(".grid-cell").forEach(cell => {
-        cell.classList.remove("highlight-valid", "highlight-invalid", "highlight-ghost", "highlight-ghost-line");
-        cell.style.removeProperty("--ghost-color");
-        cell.style.removeProperty("filter");
-    });
-    const dragCloneEl = document.getElementById("drag-clone");
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const cell = cellElements[r][c];
+            if (cell) {
+                cell.classList.remove("highlight-valid", "highlight-invalid", "highlight-ghost", "highlight-ghost-line");
+                cell.style.removeProperty("--ghost-color");
+                cell.style.removeProperty("filter");
+            }
+        }
+    }
     if (dragCloneEl) {
         dragCloneEl.classList.remove("will-clear-lines");
     }
@@ -1098,7 +1177,7 @@ function calculateHighlights(e) {
     const colorVar = `var(--theme-color-${draggingState.shape.colorIndex})`;
     
     targetCells.forEach(cell => {
-        const cellEl = boardEl.querySelector(`[data-row="${cell.r}"][data-col="${cell.c}"]`);
+        const cellEl = cellElements[cell.r] ? cellElements[cell.r][cell.c] : null;
         if (cellEl) {
             if (isValid) {
                 // Ghost: show actual block color semi-transparently
@@ -1149,19 +1228,18 @@ function calculateHighlights(e) {
         // Highlight completed lines entirely
         completedRows.forEach(r => {
             for (let c = 0; c < 8; c++) {
-                const cellEl = boardEl.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                const cellEl = cellElements[r][c];
                 if (cellEl) cellEl.classList.add("highlight-ghost-line");
             }
         });
         completedCols.forEach(c => {
             for (let r = 0; r < 8; r++) {
-                const cellEl = boardEl.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                const cellEl = cellElements[r][c];
                 if (cellEl) cellEl.classList.add("highlight-ghost-line");
             }
         });
 
         // Set drag clone color to gold if this placement clears lines
-        const dragCloneEl = document.getElementById("drag-clone");
         if (dragCloneEl) {
             if (completedRows.length > 0 || completedCols.length > 0) {
                 dragCloneEl.classList.add("will-clear-lines");
@@ -1170,7 +1248,6 @@ function calculateHighlights(e) {
             }
         }
     } else {
-        const dragCloneEl = document.getElementById("drag-clone");
         if (dragCloneEl) {
             dragCloneEl.classList.remove("will-clear-lines");
         }
@@ -1222,13 +1299,14 @@ function attemptPlacement(e) {
 
 // POINTER EVENT DRAG SYSTEM
 function initDragClone(shape, grabR, grabC) {
-    const clone = document.getElementById("drag-clone");
+    const clone = dragCloneEl;
+    if (!clone) return;
     clone.innerHTML = "";
     
     // Measure actual cell dimensions dynamically
     let cellW = 54;
     let cellH = 54;
-    const sampleCell = boardEl.querySelector(".grid-cell");
+    const sampleCell = cellElements[0] ? cellElements[0][0] : null;
     if (sampleCell) {
         const rect = sampleCell.getBoundingClientRect();
         cellW = rect.width;
@@ -1258,7 +1336,8 @@ function initDragClone(shape, grabR, grabC) {
 }
 
 function updateDragClonePosition(e) {
-    const clone = document.getElementById("drag-clone");
+    const clone = dragCloneEl;
+    if (!clone) return;
     const coords = getPointerCoords(e);
     let x = coords.x;
     let y = coords.y;
@@ -1284,7 +1363,9 @@ function updateDragClonePosition(e) {
 }
 
 function hideDragClone() {
-    document.getElementById("drag-clone").classList.add("hidden");
+    if (dragCloneEl) {
+        dragCloneEl.classList.add("hidden");
+    }
 }
 
 function onPointerDown(e) {
@@ -1369,6 +1450,10 @@ function onPointerUp(e) {
         if (dockShapeEl) {
             dockShapeEl.style.opacity = "1";
         }
+        
+        if (hasNoMoves) {
+            triggerGameOverSequence();
+        }
     }
     
     hideDragClone();
@@ -1404,6 +1489,7 @@ function startNewGame() {
     movesSinceLastClear = 0;
     historyStack = [];
     stopConfetti();
+    hasNoMoves = false;
     
     // Hide game over overlay and clear overlays
     document.getElementById("game-over-overlay").classList.add("hidden");
@@ -1412,10 +1498,12 @@ function startNewGame() {
     const boardGrid = document.getElementById('game-board');
     if (boardGrid) {
         boardGrid.classList.remove('game-over-fade');
+        boardGrid.classList.remove('game-over-active');
     }
     const shapesDock = document.getElementById('shapes-dock');
     if (shapesDock) {
         shapesDock.classList.remove('game-over-fade');
+        shapesDock.classList.remove('no-moves-warning');
     }
     const headerEl = document.querySelector('.game-header');
     if (headerEl) {

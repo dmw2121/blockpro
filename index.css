@@ -2188,6 +2188,62 @@ input:checked + .slider:before {
     filter: grayscale(1.0) brightness(0.25) contrast(0.6) blur(0.5px) !important;
 }
 
+/* Game Over Board Active State (Full-fill volcano glowing board style) */
+.board-grid.game-over-active {
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.35), inset 0 0 20px rgba(239, 68, 68, 0.15) !important;
+    transition: border-color 0.5s ease, box-shadow 0.5s ease !important;
+}
+
+/* Game Over Block (All Cells Fill Up with this new visual) */
+.grid-cell.game-over-block {
+    background-image: linear-gradient(135deg, rgba(239, 68, 68, 0.8) 0%, rgba(185, 28, 28, 0.95) 50%, rgba(17, 24, 39, 0.98) 100%) !important;
+    border-top: 3.5px solid rgba(255, 255, 255, 0.55) !important;
+    border-left: 3.5px solid rgba(255, 255, 255, 0.55) !important;
+    border-right: 3.5px solid rgba(0, 0, 0, 0.65) !important;
+    border-bottom: 3.5px solid rgba(0, 0, 0, 0.65) !important;
+    box-shadow: inset 0 2.5px 3.5px rgba(255, 255, 255, 0.35), 
+                inset 0 -2.5px 3.5px rgba(0, 0, 0, 0.6),
+                0 0 14px rgba(239, 68, 68, 0.6) !important;
+    animation: gameOverBlockPulse 1.6s infinite ease-in-out;
+    opacity: 1 !important;
+    z-index: 5;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+}
+
+@keyframes gameOverBlockPulse {
+    0%, 100% {
+        box-shadow: inset 0 2.5px 3.5px rgba(255, 255, 255, 0.25), 
+                    inset 0 -2.5px 3.5px rgba(0, 0, 0, 0.6),
+                    0 0 12px rgba(239, 68, 68, 0.5) !important;
+        filter: brightness(1.0) saturate(1.0);
+    }
+    50% {
+        box-shadow: inset 0 2.5px 3.5px rgba(255, 255, 255, 0.4), 
+                    inset 0 -2.5px 3.5px rgba(0, 0, 0, 0.6),
+                    0 0 22px rgba(239, 68, 68, 0.95) !important;
+        filter: brightness(1.3) saturate(1.2);
+    }
+}
+
+/* No Moves Warning on dock container */
+.shapes-dock-grid.no-moves-warning {
+    border: 1px solid rgba(239, 68, 68, 0.5) !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important;
+    animation: dockWarningPulse 1.4s infinite ease-in-out;
+}
+
+@keyframes dockWarningPulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.25) !important;
+        border-color: rgba(239, 68, 68, 0.35) !important;
+    }
+    50% {
+        box-shadow: 0 0 22px rgba(239, 68, 68, 0.65) !important;
+        border-color: rgba(239, 68, 68, 0.8) !important;
+    }
+}
+
 .shapes-dock-grid.game-over-fade {
     transition: filter 3.5s ease, opacity 3.5s ease !important;
     filter: grayscale(1.0) brightness(0.18) !important;
