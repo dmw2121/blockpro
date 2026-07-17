@@ -18,45 +18,34 @@
     <div class="glow-orb orb-3"></div>
 
     <div class="game-wrapper">
-        <!-- Top Control and Stats Panel -->
-        <header class="game-header glass-panel">
-            <div class="header-left">
-                <div class="logo-container">
-                    <h1 class="logo-text">BLOCK MASTER <span class="logo-badge">PRO</span></h1>
+        <!-- Top Control and Stats Panel (Block Blast Nameless Style) -->
+        <header class="game-header">
+            <!-- Top Row: High Score (🏆) & Settings Gear -->
+            <div class="header-top-row">
+                <!-- Left Side: High Score (🏆 and value, nameless) -->
+                <div class="header-high-score">
+                    <span class="crown-icon">🏆</span>
+                    <span id="high-score" class="high-score-val">0</span>
                 </div>
-                <div class="stats-row">
-                    <div class="stat-card big-score-card">
-                        <span class="stat-label">SKOR</span>
-                        <span class="stat-value big-score-value" id="current-score">0</span>
-                        <span id="combo-badge" class="combo-badge hidden"></span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">EN YÜK.</span>
-                        <span class="stat-value" id="high-score">0</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">SATIR</span>
-                        <span class="stat-value" id="lines-cleared">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="header-right">
-                <button id="settings-btn" class="icon-btn glass-panel" title="Ayarlar">
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                
+                <!-- Right Side: Settings & Controls -->
+                <button id="settings-btn" class="icon-btn-clean" title="Ayarlar">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
-                    <span>Ayarlar</span>
-                </button>
-                <button id="undo-btn" class="icon-btn glass-panel" title="Geri Al (Son 5 Hamle)">
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 7v6h6"></path>
-                        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
-                    </svg>
-                    <span>Geri Al</span>
-                    <span id="undo-badge" class="badge">0/5</span>
                 </button>
             </div>
+            
+            <!-- Bottom Row: Huge Current Score (nameless, centered) -->
+            <div class="header-current-score">
+                <span id="current-score" class="current-score-val">0</span>
+                <span id="combo-badge" class="combo-badge hidden"></span>
+            </div>
+            
+            <!-- Hidden elements to prevent JS crashes -->
+            <span id="lines-cleared" style="display: none;">0</span>
+            <button id="undo-btn" style="display: none;"><span id="undo-badge">0/5</span></button>
         </header>
 
         <!-- Main Board and Dock Area -->
@@ -73,9 +62,8 @@
                 <div id="theme-banner-overlay" class="theme-banner-overlay hidden"></div>
             </div>
 
-            <!-- Drag & Drop Dock -->
-            <div class="dock-container glass-panel">
-                <div class="dock-title">PARÇALAR</div>
+            <!-- Drag & Drop Dock (Minimal, integrated style) -->
+            <div class="dock-container">
                 <div id="shapes-dock" class="shapes-dock-grid">
                     <!-- 3 Shape containers will be populated dynamically -->
                     <div class="dock-slot" id="slot-0"></div>
@@ -94,7 +82,7 @@
     <div id="game-over-overlay" class="go-overlay hidden">
         <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
         <div class="go-card">
-            <div class="go-emoji" id="go-emoji">💀</div>
+            <div class="go-emoji" id="go-emoji">🥺</div>
             <h2 class="go-title">OYUN BİTTİ</h2>
             <p class="go-subtitle" id="go-subtitle">Hamle kalmadı!</p>
             <p class="go-motivation" id="go-motivation"></p>
@@ -126,20 +114,41 @@
         </div>
     </div>
 
-    <!-- Start Screen Overlay -->
+    <!-- Start Screen Overlay (Block Blast Style) -->
     <div id="start-screen-overlay" class="start-overlay">
         <div class="start-card">
-            <h1 class="start-logo">BLOCK MASTER <span class="logo-badge">PRO</span></h1>
-            <p class="start-description">Eşsiz temalar, akıcı animasyonlar ve derin dinlendirici fon müzikleri eşliğinde zihninizi dinlendirin.</p>
+            <!-- Colorful Blocky Logo (BLOCK MASTER PRO) -->
+            <h1 class="start-logo-blocky">
+                <div class="logo-row">
+                    <span class="logo-letter letter-b">B</span>
+                    <span class="logo-letter letter-l">L</span>
+                    <span class="logo-letter letter-o">O</span>
+                    <span class="logo-letter letter-c">C</span>
+                    <span class="logo-letter letter-k">K</span>
+                </div>
+                <div class="logo-row">
+                    <span class="logo-letter letter-m">M</span>
+                    <span class="logo-letter letter-a">A</span>
+                    <span class="logo-letter letter-s">S</span>
+                    <span class="logo-letter letter-t">T</span>
+                    <span class="logo-letter letter-e">E</span>
+                    <span class="logo-letter letter-r">R</span>
+                </div>
+                <div class="logo-row">
+                    <span class="logo-letter letter-p">P</span>
+                    <span class="logo-letter letter-r2">R</span>
+                    <span class="logo-letter letter-o2">O</span>
+                </div>
+            </h1>
             
             <div class="start-high-score">
-                <span class="start-score-label">🏆 EN YÜKSEK SKOR</span>
-                <span class="start-score-val" id="start-high-score-val">0</span>
+                <span class="start-score-label">🏆 BEST SCORE</span>
+                <span id="start-high-score-val" class="start-high-val">0</span>
             </div>
             
             <div class="start-buttons">
-                <button id="start-game-btn" class="start-btn-primary">OYUNA BAŞLA</button>
-                <button id="start-settings-btn" class="start-btn-secondary">AYARLAR</button>
+                <button id="start-game-btn" class="start-play-btn">PLAY</button>
+                <button id="start-settings-btn" style="display: none;"></button>
             </div>
         </div>
     </div>
@@ -150,13 +159,6 @@
             <h2 class="settings-title">AYARLAR</h2>
             
             <div class="settings-options">
-                <div class="settings-option">
-                    <span class="option-label">🎵 Arka Plan Müziği</span>
-                    <label class="switch">
-                        <input type="checkbox" id="music-toggle" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
                 <div class="settings-option">
                     <span class="option-label">🔊 Ses Efektleri</span>
                     <label class="switch">

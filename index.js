@@ -2,45 +2,51 @@
    BLOCK MASTER PRO - CORE GAME ENGINE
    ========================================================================== */
 
-// 1. SHAPE LIBRARY (Shapes <= 4 blocks)
+// 1. SHAPE LIBRARY (2x2, 3x3, I4, I3, I2, 5-L, 4-L, 4-Z)
 const SHAPES = [
-    // 1 Block
-    { matrix: [[1]], name: "Single" },
-    // 2 Blocks
-    { matrix: [[1, 1]], name: "Domino H" },
-    { matrix: [[1], [1]], name: "Domino V" },
-    // 3 Blocks
-    { matrix: [[1, 1, 1]], name: "Trio H" },
-    { matrix: [[1], [1], [1]], name: "Trio V" },
-    { matrix: [[1, 1], [1, 0]], name: "Triomino L Corner 1" },
-    { matrix: [[1, 1], [0, 1]], name: "Triomino L Corner 2" },
-    { matrix: [[1, 0], [1, 1]], name: "Triomino L Corner 3" },
-    { matrix: [[0, 1], [1, 1]], name: "Triomino L Corner 4" },
-    // 4 Blocks (Tetris Tetrominoes)
-    { matrix: [[1, 1], [1, 1]], name: "O-Block" },
-    { matrix: [[1, 1, 1, 1]], name: "I-Block H" },
-    { matrix: [[1], [1], [1], [1]], name: "I-Block V" },
-    // T-Block
-    { matrix: [[1, 1, 1], [0, 1, 0]], name: "T-Block Down" },
-    { matrix: [[0, 1, 0], [1, 1, 1]], name: "T-Block Up" },
-    { matrix: [[1, 0], [1, 1], [1, 0]], name: "T-Block Right" },
-    { matrix: [[0, 1], [1, 1], [0, 1]], name: "T-Block Left" },
-    // L-Block
-    { matrix: [[1, 0], [1, 0], [1, 1]], name: "L-Block Right" },
-    { matrix: [[1, 1, 1], [1, 0, 0]], name: "L-Block Down" },
-    { matrix: [[1, 1], [0, 1], [0, 1]], name: "L-Block Left" },
-    { matrix: [[0, 0, 1], [1, 1, 1]], name: "L-Block Up" },
-    // J-Block
-    { matrix: [[0, 1], [0, 1], [1, 1]], name: "J-Block Right" },
-    { matrix: [[1, 0, 0], [1, 1, 1]], name: "J-Block Down" },
-    { matrix: [[1, 1], [1, 0], [1, 0]], name: "J-Block Left" },
-    { matrix: [[1, 1, 1], [0, 0, 1]], name: "J-Block Up" },
-    // S-Block
-    { matrix: [[0, 1, 1], [1, 1, 0]], name: "S-Block H" },
-    { matrix: [[1, 0], [1, 1], [0, 1]], name: "S-Block V" },
-    // Z-Block
-    { matrix: [[1, 1, 0], [0, 1, 1]], name: "Z-Block H" },
-    { matrix: [[0, 1], [1, 1], [1, 0]], name: "Z-Block V" }
+    // 2x2 square
+    { matrix: [[1, 1], [1, 1]], name: "Square 2x2" },
+    
+    // 3x3 square
+    { matrix: [[1, 1, 1], [1, 1, 1], [1, 1, 1]], name: "Square 3x3" },
+    
+    // 4-block line (Horizontal & Vertical)
+    { matrix: [[1, 1, 1, 1]], name: "I4 Horizontal" },
+    { matrix: [[1], [1], [1], [1]], name: "I4 Vertical" },
+    
+    // 3-block line (Horizontal & Vertical)
+    { matrix: [[1, 1, 1]], name: "I3 Horizontal" },
+    { matrix: [[1], [1], [1]], name: "I3 Vertical" },
+    
+    // 2-block line (Horizontal & Vertical)
+    { matrix: [[1, 1]], name: "I2 Horizontal" },
+    { matrix: [[1], [1]], name: "I2 Vertical" },
+    
+    // 5-block L (Giant L, all 4 directions)
+    { matrix: [[1, 0, 0], [1, 0, 0], [1, 1, 1]], name: "Giant L 1" },
+    { matrix: [[1, 1, 1], [1, 0, 0], [1, 0, 0]], name: "Giant L 2" },
+    { matrix: [[1, 1, 1], [0, 0, 1], [0, 0, 1]], name: "Giant L 3" },
+    { matrix: [[0, 0, 1], [0, 0, 1], [1, 1, 1]], name: "Giant L 4" },
+    
+    // 4-block L (Standard L, all 4 directions)
+    { matrix: [[1, 0], [1, 0], [1, 1]], name: "L-Block 1" },
+    { matrix: [[1, 1, 1], [1, 0, 0]], name: "L-Block 2" },
+    { matrix: [[1, 1], [0, 1], [0, 1]], name: "L-Block 3" },
+    { matrix: [[0, 0, 1], [1, 1, 1]], name: "L-Block 4" },
+    
+    // 4-block J (Standard J/Mirrored L, all 4 directions)
+    { matrix: [[0, 1], [0, 1], [1, 1]], name: "J-Block 1" },
+    { matrix: [[1, 0, 0], [1, 1, 1]], name: "J-Block 2" },
+    { matrix: [[1, 1], [1, 0], [1, 0]], name: "J-Block 3" },
+    { matrix: [[1, 1, 1], [0, 0, 1]], name: "J-Block 4" },
+    
+    // 4-block Z (all directions)
+    { matrix: [[1, 1, 0], [0, 1, 1]], name: "Z-Block 1" },
+    { matrix: [[0, 1], [1, 1], [1, 0]], name: "Z-Block 2" },
+    
+    // 4-block S (mirrored Z, all directions)
+    { matrix: [[0, 1, 1], [1, 1, 0]], name: "S-Block 1" },
+    { matrix: [[1, 0], [1, 1], [0, 1]], name: "S-Block 2" }
 ];
 
 // GAME STATE
@@ -52,7 +58,7 @@ let themeIndex = 0;
 let comboCount = 0;
 let movesSinceLastClear = 0;
 let sfxEnabled = true;
-let musicEnabled = true;
+let musicEnabled = false;
 let premiumUnlocked = false;
 let dockShapes = [null, null, null];
 let historyStack = []; // Max 5 items
@@ -76,75 +82,156 @@ const AudioEngine = (() => {
         if (!ctx_a) ctx_a = new (window.AudioContext || window.webkitAudioContext)();
     }
     function tone(freq, type, gain, dur, startTime) {
-        const osc = ctx_a.createOscillator();
+        // Create nodes
+        const filter = ctx_a.createBiquadFilter();
         const gainNode = ctx_a.createGain();
-        osc.connect(gainNode);
+        
+        filter.type = 'lowpass';
+        // Pluck sweep: filter starts high and sweeps down rapidly to freq * 1.5
+        filter.frequency.setValueAtTime(freq * 5, startTime);
+        filter.frequency.exponentialRampToValueAtTime(freq * 1.5, startTime + Math.min(0.08, dur * 0.5));
+        filter.Q.setValueAtTime(4, startTime); // Subtle resonance peak
+
+        // Two detuned oscillators for rich chorus-like thickness
+        const osc1 = ctx_a.createOscillator();
+        const osc2 = ctx_a.createOscillator();
+        
+        osc1.type = type;
+        osc2.type = type;
+        
+        osc1.frequency.setValueAtTime(freq, startTime);
+        osc2.frequency.setValueAtTime(freq, startTime);
+        
+        // Detune by +/- 6 cents
+        osc1.detune.setValueAtTime(-6, startTime);
+        osc2.detune.setValueAtTime(6, startTime);
+        
+        // Connections
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gainNode);
         gainNode.connect(ctx_a.destination);
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, startTime);
-        gainNode.gain.setValueAtTime(gain, startTime);
+        
+        // ADSR Gain Envelope
+        const attack = 0.005; // 5ms click transient
+        const decay = Math.min(0.03, dur * 0.3);
+        const sustainVal = gain * 0.5;
+        const release = Math.min(0.06, dur * 0.4);
+        
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(gain, startTime + attack);
+        gainNode.gain.exponentialRampToValueAtTime(sustainVal, startTime + attack + decay);
+        gainNode.gain.setValueAtTime(sustainVal, startTime + Math.max(attack + decay, dur - release));
         gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
-        osc.start(startTime);
-        osc.stop(startTime + dur + 0.01);
+        
+        // Start and stop
+        osc1.start(startTime);
+        osc2.start(startTime);
+        osc1.stop(startTime + dur + 0.02);
+        osc2.stop(startTime + dur + 0.02);
     }
     return {
-        // Soft thud when block placed
+        // Soft woody block landing click ("Woody Knock")
         place() {
             if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
-                tone(180, 'sine', 0.18, 0.08, t);
-                tone(120, 'sine', 0.12, 0.12, t + 0.02);
+                // Woody woodblock tock sound using pitch-sweep triangle
+                const osc = ctx_a.createOscillator();
+                const gainNode = ctx_a.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(320, t);
+                osc.frequency.exponentialRampToValueAtTime(100, t + 0.05);
+                gainNode.gain.setValueAtTime(0.2, t);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                osc.connect(gainNode);
+                gainNode.connect(ctx_a.destination);
+                osc.start(t);
+                osc.stop(t + 0.06);
+
+                // High click transient
+                const click = ctx_a.createOscillator();
+                const clickGain = ctx_a.createGain();
+                click.type = 'sine';
+                click.frequency.setValueAtTime(2400, t);
+                clickGain.gain.setValueAtTime(0.08, t);
+                clickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.005);
+                click.connect(clickGain);
+                clickGain.connect(ctx_a.destination);
+                click.start(t);
+                click.stop(t + 0.01);
             } catch(e) {}
         },
-        // Satisfying whoosh on line clear (1-2 lines)
+        // Satisfying cascading glass bubble pop on line clear (1-2 lines)
         clear() {
             if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
-                tone(440, 'sine', 0.22, 0.15, t);
-                tone(660, 'sine', 0.18, 0.15, t + 0.07);
-                tone(880, 'sine', 0.14, 0.18, t + 0.14);
+                // High-pitched crystal glass bubble pop sound
+                const freqs = [1600, 2000, 2400, 2800];
+                freqs.forEach((f, i) => {
+                    const osc = ctx_a.createOscillator();
+                    const gainNode = ctx_a.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(f, t + i * 0.02);
+                    gainNode.gain.setValueAtTime(0.12, t + i * 0.02);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, t + i * 0.02 + 0.08);
+                    osc.connect(gainNode);
+                    gainNode.connect(ctx_a.destination);
+                    osc.start(t + i * 0.02);
+                    osc.stop(t + i * 0.02 + 0.1);
+                });
             } catch(e) {}
         },
-        // Punchy combo (3 lines)
+        // Melodic arpeggiated chime progression on 3 lines clear
         combo() {
             if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
-                [523, 659, 784, 1047].forEach((f, i) => tone(f, 'triangle', 0.22, 0.18, t + i * 0.08));
+                // Arpeggiated chime progression
+                [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+                    tone(f, 'sine', 0.2, 0.3, t + i * 0.06);
+                    tone(f * 1.5, 'sine', 0.06, 0.2, t + i * 0.06 + 0.01);
+                });
             } catch(e) {}
         },
-        // Epic ultra fanfare (4 lines)
+        // Epic ascending pentatonic chime sweep on 4 lines clear (Ultra)
         ultra() {
             if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
-                [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => {
-                    tone(f, 'triangle', 0.25, 0.22, t + i * 0.07);
-                    tone(f * 2, 'sine', 0.10, 0.20, t + i * 0.07 + 0.01);
+                // Ascending melodic kalimba sweep
+                [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50].forEach((f, i) => {
+                    tone(f, 'sine', 0.22, 0.4, t + i * 0.05);
+                    tone(f * 2, 'sine', 0.08, 0.25, t + i * 0.05 + 0.015);
                 });
             } catch(e) {}
         },
-        // Progressive combo sound scaling with multiplier
+        // Progressive combo sound scaling with pentatonic scale
         comboProgressive(comboIndex) {
             if (!sfxEnabled) return;
             try {
                 init();
                 const t = ctx_a.currentTime;
-                // Base notes shifted up by comboIndex semitones
-                const baseFreqs = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
-                const semitones = comboIndex - 1;
-                const factor = Math.pow(1.059463, semitones); // Standard 12-TET tuning step
-                baseFreqs.forEach((f, i) => {
-                    tone(f * factor, 'triangle', 0.22, 0.18, t + i * 0.08);
-                    // Add secondary harmony sine wave
-                    tone(f * factor * 1.5, 'sine', 0.08, 0.12, t + i * 0.08 + 0.02);
-                });
+                // Pentatonic scale frequencies
+                const scale = [
+                    261.63, 293.66, 329.63, 392.00, 440.00, // C4, D4, E4, G4, A4
+                    523.25, 587.33, 659.25, 783.99, 880.00, // C5, D5, E5, G5, A5
+                    1046.50, 1174.66, 1318.51, 1567.98, 1760.00, // C6, D6, E6, G6, A6
+                    2093.00
+                ];
+                // Resolve note index based on combo count (first combo starts at index 0)
+                const noteIdx = Math.min(comboIndex - 2, scale.length - 1);
+                const freq = scale[noteIdx];
+                
+                // Play melodic kalimba chime: fundamental + overtones
+                tone(freq, 'sine', 0.25, 0.45, t);
+                tone(freq * 1.5, 'sine', 0.1, 0.35, t + 0.01); // 5th harmonic
+                tone(freq * 2.0, 'sine', 0.08, 0.25, t + 0.02); // octave harmonic
             } catch(e) {}
         },
         // Sad descending game over
@@ -210,49 +297,41 @@ function renderBoard() {
     });
 }
 
-// 3. DIRTY START ALGORITHM (30% to 40% fill, no full lines)
+// 3. DIRTY START ALGORITHM (Custom puzzle layout to allow full clear with 2x2 shape)
 function fillBoardDirty() {
     // Reset board array
     board = Array(8).fill(null).map(() => Array(8).fill(0));
     
-    // Choose exactly 19 cells for exactly 30% fill rate (19 / 64 cells ≈ 30%)
-    const fillCount = 19;
-    
-    // Create pool of all 64 board coordinates
-    let coords = [];
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            coords.push({ r, c });
-        }
+    // Fill the puzzle layout (Rows 0-5 Cols 6-7, and Rows 6-7 Cols 0-5)
+    // Rows 0-5, Cols 6-7
+    for (let r = 0; r <= 5; r++) {
+        board[r][6] = 3;
+        board[r][7] = 3;
     }
-    
-    // Shuffle coordinates pool
-    coords.sort(() => Math.random() - 0.5);
-    
-    let placed = 0;
-    for (let i = 0; i < coords.length; i++) {
-        if (placed >= fillCount) break;
-        
-        const { r, c } = coords[i];
-        
-        // Count blocks currently in row r and column c
-        let rowCount = 0;
-        let colCount = 0;
-        for (let j = 0; j < 8; j++) {
-            if (board[r][j] > 0) rowCount++;
-            if (board[j][c] > 0) colCount++;
-        }
-        
-        // Ensure no row or column completes (limit to maximum 7 filled cells)
-        if (rowCount < 7 && colCount < 7) {
-            board[r][c] = 1 + Math.floor(Math.random() * 4); // random color index 1-4
-            placed++;
-        }
+    // Rows 6-7, Cols 0-5
+    for (let c = 0; c <= 5; c++) {
+        board[6][c] = 3;
+        board[7][c] = 3;
     }
 }
 
 // DOCK SHAPE GENERATOR
 function generateNewDockShapes() {
+    // Check if this is the very first turn of a new game (zero score)
+    const isFirstTurn = score === 0;
+    if (isFirstTurn) {
+        const fixedShapes = [
+            { matrix: [[1, 1], [1, 1]], name: "Square 2x2", colorIndex: 3 },                  // Yellow 2x2
+            { matrix: [[1, 1, 1], [1, 1, 1], [1, 1, 1]], name: "Square 3x3", colorIndex: 3 },  // Yellow 3x3
+            { matrix: [[1, 1, 1, 1]], name: "I4 Horizontal", colorIndex: 3 }                  // Yellow 4-line
+        ];
+        for (let i = 0; i < 3; i++) {
+            dockShapes[i] = fixedShapes[i];
+        }
+        renderDock(); // Render immediately to make the starting blocks visible!
+        return;
+    }
+
     for (let i = 0; i < 3; i++) {
         const randomShapeIdx = Math.floor(Math.random() * SHAPES.length);
         const shapeDef = SHAPES[randomShapeIdx];
@@ -361,7 +440,7 @@ function saveToHistory() {
 
 function updateUndoUI() {
     const badge = document.getElementById("undo-badge");
-    badge.innerText = `${historyStack.length}/5`;
+    badge.textContent = `${historyStack.length}/5`;
     if (historyStack.length === 0) {
         undoBtn.classList.add("disabled");
         undoBtn.style.opacity = "0.5";
@@ -410,12 +489,12 @@ function animateScoreTo(target) {
         // Ease out cubic
         const eased = 1 - Math.pow(1 - progress, 3);
         displayedScore = Math.round(start + diff * eased);
-        currentScoreEl.innerText = displayedScore.toLocaleString();
+        currentScoreEl.textContent = displayedScore;
         if (progress < 1) {
             scoreAnimFrame = requestAnimationFrame(step);
         } else {
             displayedScore = target;
-            currentScoreEl.innerText = target.toLocaleString();
+            currentScoreEl.textContent = target;
         }
     }
     scoreAnimFrame = requestAnimationFrame(step);
@@ -423,8 +502,8 @@ function animateScoreTo(target) {
 
 function updateUI() {
     animateScoreTo(score);
-    highScoreEl.innerText = highScore.toLocaleString();
-    linesClearedEl.innerText = linesCleared;
+    highScoreEl.textContent = highScore;
+    linesClearedEl.textContent = linesCleared;
 }
 
 // 8. DORMANT CANVAS ENGINE (Particles on Line Clear & Placement)
@@ -436,13 +515,27 @@ function resizeCanvas() {
     ctx.scale(dpr, dpr);
 }
 
-function spawnExplosion(row, col, color, count = 12, sizeMultiplier = 1.0) {
+function spawnExplosion(row, col, color, count = 1, sizeMultiplier = 1.0, restrictType = "none") {
     const rect = canvas.getBoundingClientRect();
     const cellW = rect.width / 8;
     const cellH = rect.height / 8;
     
     const startX = col * cellW + cellW / 2;
     const startY = row * cellH + cellH / 2;
+    
+    let minY = 0, maxY = rect.height, minX = 0, maxX = rect.width;
+    if (restrictType === "row") {
+        minY = row * cellH;
+        maxY = (row + 1) * cellH;
+    } else if (restrictType === "col") {
+        minX = col * cellW;
+        maxX = (col + 1) * cellW;
+    } else if (restrictType === "cell") {
+        minY = row * cellH;
+        maxY = (row + 1) * cellH;
+        minX = col * cellW;
+        maxX = (col + 1) * cellW;
+    }
     
     for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -456,8 +549,11 @@ function spawnExplosion(row, col, color, count = 12, sizeMultiplier = 1.0) {
             color: color,
             alpha: 1,
             decay: 0.018 + Math.random() * 0.018,
-            gravity: 0.09,
-            trail: sizeMultiplier > 1.5 // large particles get trail effect
+            gravity: restrictType === "row" || restrictType === "cell" ? 0.01 : 0.09, // lower gravity for horizontal/cell channels
+            trail: sizeMultiplier > 1.5, // large particles get trail effect
+            minX, maxX, minY, maxY,
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 0.15
         });
     }
 
@@ -507,8 +603,9 @@ function spawnMegaFireworks(linesCount) {
 }
 
 function updateParticles() {
-    const rect = canvas.getBoundingClientRect();
-    ctx.clearRect(0, 0, rect.width, rect.height);
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+    ctx.clearRect(0, 0, width, height);
 
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -516,10 +613,30 @@ function updateParticles() {
         p.y += p.vy;
         p.vy += p.gravity; // Gravity pull downwards
         p.alpha -= p.decay;
+        if (p.rotation !== undefined) {
+            p.rotation += p.rotationSpeed;
+        }
         
         if (p.alpha <= 0) {
             particles.splice(i, 1);
             continue;
+        }
+
+        // Keep explosion inside line/cell boundaries with elastic bouncing
+        if (p.minX !== undefined && p.x - p.size < p.minX) {
+            p.x = p.minX + p.size;
+            p.vx = -p.vx * 0.5;
+        } else if (p.maxX !== undefined && p.x + p.size > p.maxX) {
+            p.x = p.maxX - p.size;
+            p.vx = -p.vx * 0.5;
+        }
+        
+        if (p.minY !== undefined && p.y - p.size < p.minY) {
+            p.y = p.minY + p.size;
+            p.vy = -p.vy * 0.5;
+        } else if (p.maxY !== undefined && p.y + p.size > p.maxY) {
+            p.y = p.maxY - p.size;
+            p.vy = -p.vy * 0.5;
         }
 
         ctx.save();
@@ -530,9 +647,21 @@ function updateParticles() {
             ctx.shadowBlur = p.size * 3;
             ctx.shadowColor = p.color;
         }
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        
+        // Translate to particle center and rotate
+        ctx.translate(p.x, p.y);
+        if (p.rotation !== undefined) {
+            ctx.rotate(p.rotation);
+        }
+        
+        // Draw square/block debris particle
+        ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2);
+        
+        // Add a subtle 3D highlight edge to each block debris particle
+        ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+        ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 0.3); // Top highlight edge
+        ctx.fillRect(-p.size, -p.size, p.size * 0.3, p.size * 2); // Left highlight edge
+        
         ctx.restore();
     }
 
@@ -541,7 +670,7 @@ function updateParticles() {
         requestAnimationFrame(updateParticles);
     } else {
         isAnimationRunning = false;
-        ctx.clearRect(0, 0, rect.width, rect.height);
+        ctx.clearRect(0, 0, width, height);
         console.log("[CANVAS] Particles clean. Entering Dormant State (0% CPU)");
     }
 }
@@ -592,10 +721,6 @@ function checkGameOver() {
         }
         
         AudioEngine.gameOver();
-        if (bgMusic) {
-            bgMusic.pause();
-            musicPlaying = false;
-        }
         
         // Trigger the sad crumble dispersal and fade effects on the board
         const boardGrid = document.getElementById('game-board');
@@ -650,9 +775,9 @@ function checkGameOver() {
         }
         
         // Fill game over screen
-        document.getElementById('game-over-score').innerText = score.toLocaleString();
-        document.getElementById('game-over-high').innerText = highScore.toLocaleString();
-        document.getElementById('go-lines').innerText = linesCleared;
+        document.getElementById('game-over-score').textContent = score;
+        document.getElementById('game-over-high').textContent = highScore;
+        document.getElementById('go-lines').textContent = linesCleared;
         
         const newRecordEl = document.getElementById('go-new-record');
         if (isNewRecord) {
@@ -663,8 +788,8 @@ function checkGameOver() {
             startConfetti();
         } else {
             newRecordEl.classList.add('hidden');
-            document.getElementById('go-emoji').textContent = '💀';
-            document.getElementById('go-subtitle').textContent = 'Hamle kalmadı!';
+            document.getElementById('go-emoji').textContent = '🥺';
+            document.getElementById('go-subtitle').textContent = 'Daha fazla hamle kalmadı...';
             stopConfetti();
         }
         
@@ -675,6 +800,41 @@ function checkGameOver() {
     }
 }
 
+
+// FLOATING SCORE POPUPS (spawns gold points text that floats up and fades out)
+function spawnFloatingText(text, row, col) {
+    const boardContainer = document.querySelector(".board-container");
+    const cellEl = boardEl.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    if (!boardContainer || !cellEl) return;
+    
+    const boardRect = boardEl.getBoundingClientRect();
+    const cellRect = cellEl.getBoundingClientRect();
+    
+    // Position exactly at the center of the cell relative to board-container
+    const left = cellRect.left - boardRect.left + cellRect.width / 2;
+    const top = cellRect.top - boardRect.top + cellRect.height / 2;
+    
+    const floatingEl = document.createElement("div");
+    
+    // Check if it's a multiplier/combo indicator (ends with 'x')
+    if (text.endsWith("x")) {
+        floatingEl.className = "floating-score floating-multiplier";
+    } else {
+        floatingEl.className = "floating-score";
+    }
+    
+    floatingEl.textContent = text;
+    floatingEl.style.left = `${left}px`;
+    floatingEl.style.top = `${top}px`;
+    floatingEl.style.transform = "translate(-50%, -50%)";
+    
+    boardContainer.appendChild(floatingEl);
+    
+    // Remove element after animation finishes
+    setTimeout(() => {
+        floatingEl.remove();
+    }, 850);
+}
 
 // ROW AND COLUMN CLEARING LOGIC (With combo calculations)
 function checkLinesAndClear() {
@@ -707,6 +867,14 @@ function checkLinesAndClear() {
     
     const linesCount = completedRows.length + completedCols.length;
     if (linesCount > 0) {
+        // Trigger board screen shake for satisfying impact feedback
+        boardEl.classList.remove("shake-board");
+        boardEl.offsetHeight; // force reflow
+        boardEl.classList.add("shake-board");
+        setTimeout(() => {
+            boardEl.classList.remove("shake-board");
+        }, 150);
+
         // Increment consecutive combo multiplier (capped at 50x)
         comboCount++;
         if (comboCount > 50) {
@@ -730,16 +898,26 @@ function checkLinesAndClear() {
             const val = board[r][c];
             if (val > 0) {
                 const colorStr = getComputedStyle(document.body).getPropertyValue(`--theme-color-${val}`).trim() || "#ffffff";
-                const count = isMegaClear ? 20 : 12;
+                const count = isMegaClear ? 2 : 1;
                 const sizeMult = linesCount >= 4 ? 2.0 : linesCount >= 3 ? 1.5 : 1.0;
-                spawnExplosion(r, c, colorStr, count, sizeMult);
+                
+                // Restrict explosion bounds within the clearing rows/columns
+                let restrictType = "none";
+                const inRow = completedRows.includes(r);
+                const inCol = completedCols.includes(c);
+                if (inRow && inCol) {
+                    restrictType = "cell"; // Intersection cell boundary
+                } else if (inRow) {
+                    restrictType = "row";  // Horizontal row boundary
+                } else if (inCol) {
+                    restrictType = "col";  // Vertical column boundary
+                }
+                
+                spawnExplosion(r, c, colorStr, count, sizeMult, restrictType);
             }
         });
         
-        // Extra mega fireworks burst for 3x or 4x clears
-        if (isMegaClear) {
-            spawnMegaFireworks(linesCount);
-        }
+
         
         // Clear cells in matrix array
         completedRows.forEach(r => {
@@ -749,8 +927,8 @@ function checkLinesAndClear() {
             for (let r = 0; r < 8; r++) board[r][c] = 0;
         });
         
-        // Base Score formula with 3x/4x simultaneous line clear multiplier bonus
-        let scoreGain = linesCount * 100 * linesCount;
+        // Base Score formula scaled down by 10 (10 katları değil 1 li olacak)
+        let scoreGain = linesCount * 10 * linesCount;
         if (linesCount >= 4) {
             scoreGain = Math.round(scoreGain * 4);
         } else if (linesCount >= 3) {
@@ -774,6 +952,20 @@ function checkLinesAndClear() {
         }
         
         score += scoreGain;
+
+        // Spawn flying score popup for lines cleared
+        let midR = 3;
+        let midC = 3;
+        if (completedRows.length > 0) midR = completedRows[Math.floor(completedRows.length / 2)];
+        if (completedCols.length > 0) midC = completedCols[Math.floor(completedCols.length / 2)];
+        spawnFloatingText(`+${scoreGain}`, midR, midC);
+        
+        // Spawn 2x, 3x, 4x popups on top of the cleared row/col if multiple lines cleared
+        if (linesCount >= 2) {
+            setTimeout(() => {
+                spawnFloatingText(`${linesCount}x`, midR, midC);
+            }, 180);
+        }
         
         // Show combo badge on the score display
         showComboBadge(linesCount, scoreGain, comboCount);
@@ -815,40 +1007,32 @@ function getTargetBoardCell(e) {
     let x = coords.x;
     let y = coords.y;
     
-    // Touch: move clone well above finger so it's always visible
     if (e.pointerType === "touch") {
         y -= 120;
     }
     
-    let closestCell = null;
-    let minDistance = Infinity;
+    // Get cached board bounds
+    const boardRect = (draggingState && draggingState.boardRect) ? draggingState.boardRect : boardEl.getBoundingClientRect();
     
-    const cells = boardEl.querySelectorAll(".grid-cell");
-    let cellW = 54;
-    const sampleCell = boardEl.querySelector(".grid-cell");
-    if (sampleCell) {
-        cellW = sampleCell.getBoundingClientRect().width;
-    }
+    const left = boardRect.left;
+    const top = boardRect.top;
+    const width = boardRect.width;
+    const height = boardRect.height;
     
-    // Find cell with minimum Euclidean distance to pointer
-    cells.forEach(cell => {
-        const rect = cell.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const dist = Math.hypot(x - centerX, y - centerY);
-        
-        if (dist < minDistance) {
-            minDistance = dist;
-            closestCell = cell;
-        }
-    });
+    const cellW = width / 8;
+    const cellH = height / 8;
     
-    // Only snap if the pointer is within a reasonable radius (1.5 times cell size)
-    if (closestCell && minDistance < cellW * 1.5) {
-        return {
-            hoverR: parseInt(closestCell.dataset.row),
-            hoverC: parseInt(closestCell.dataset.col)
-        };
+    const relX = x - left;
+    const relY = y - top;
+    
+    const thresholdX = cellW * 0.75;
+    const thresholdY = cellH * 0.75;
+    
+    if (relX >= -thresholdX && relX < width + thresholdX &&
+        relY >= -thresholdY && relY < height + thresholdY) {
+        const col = Math.max(0, Math.min(7, Math.floor(relX / cellW)));
+        const row = Math.max(0, Math.min(7, Math.floor(relY / cellH)));
+        return { hoverR: row, hoverC: col };
     }
     
     return { hoverR: -1, hoverC: -1 };
@@ -886,10 +1070,14 @@ function checkPlacementValidity(shape, grabR, grabC, hoverR, hoverC) {
 // HIGHLIGHT BOARD GRID HOVERS (with ghost block color preview)
 function clearBoardHighlights() {
     boardEl.querySelectorAll(".grid-cell").forEach(cell => {
-        cell.classList.remove("highlight-valid", "highlight-invalid", "highlight-ghost");
+        cell.classList.remove("highlight-valid", "highlight-invalid", "highlight-ghost", "highlight-ghost-line");
         cell.style.removeProperty("--ghost-color");
         cell.style.removeProperty("filter");
     });
+    const dragCloneEl = document.getElementById("drag-clone");
+    if (dragCloneEl) {
+        dragCloneEl.classList.remove("will-clear-lines");
+    }
 }
 
 function calculateHighlights(e) {
@@ -921,6 +1109,72 @@ function calculateHighlights(e) {
             }
         }
     });
+
+    // If placement is valid, predict and highlight completed rows/columns completely
+    if (isValid && targetCells.length > 0) {
+        // Create a simulated board state
+        const tempBoard = board.map(row => [...row]);
+        const shapeColorIndex = draggingState.shape.colorIndex;
+        targetCells.forEach(cell => {
+            tempBoard[cell.r][cell.c] = shapeColorIndex;
+        });
+        
+        const completedRows = [];
+        const completedCols = [];
+        
+        // Check rows
+        for (let r = 0; r < 8; r++) {
+            let full = true;
+            for (let c = 0; c < 8; c++) {
+                if (tempBoard[r][c] === 0) {
+                    full = false;
+                    break;
+                }
+            }
+            if (full) completedRows.push(r);
+        }
+        
+        // Check columns
+        for (let c = 0; c < 8; c++) {
+            let full = true;
+            for (let r = 0; r < 8; r++) {
+                if (tempBoard[r][c] === 0) {
+                    full = false;
+                    break;
+                }
+            }
+            if (full) completedCols.push(c);
+        }
+        
+        // Highlight completed lines entirely
+        completedRows.forEach(r => {
+            for (let c = 0; c < 8; c++) {
+                const cellEl = boardEl.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                if (cellEl) cellEl.classList.add("highlight-ghost-line");
+            }
+        });
+        completedCols.forEach(c => {
+            for (let r = 0; r < 8; r++) {
+                const cellEl = boardEl.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                if (cellEl) cellEl.classList.add("highlight-ghost-line");
+            }
+        });
+
+        // Set drag clone color to gold if this placement clears lines
+        const dragCloneEl = document.getElementById("drag-clone");
+        if (dragCloneEl) {
+            if (completedRows.length > 0 || completedCols.length > 0) {
+                dragCloneEl.classList.add("will-clear-lines");
+            } else {
+                dragCloneEl.classList.remove("will-clear-lines");
+            }
+        }
+    } else {
+        const dragCloneEl = document.getElementById("drag-clone");
+        if (dragCloneEl) {
+            dragCloneEl.classList.remove("will-clear-lines");
+        }
+    }
 }
 
 // ATTEMPT SHAPE DEPOSITION
@@ -950,8 +1204,13 @@ function attemptPlacement(e) {
         // Play placement sound
         AudioEngine.place();
         
-        // 10 score points per block placed
-        score += targetCells.length * 10;
+        // 1 score point per block cell placed (10 katları değil 1 li olacak)
+        const pointsGained = targetCells.length;
+        score += pointsGained;
+        
+        // Spawn flying score popup for block placement
+        const midCell = targetCells[Math.floor(targetCells.length / 2)];
+        spawnFloatingText(`+${pointsGained}`, midCell.r, midCell.c);
         
         renderBoard();
         checkLinesAndClear();
@@ -1008,21 +1267,15 @@ function updateDragClonePosition(e) {
         y -= 120;  // same offset as getTargetBoardCell so ghost snaps correctly
     }
     
-    // Measure actual cell dimensions
-    let cellW = 54;
-    let cellH = 54;
-    const sampleCell = boardEl.querySelector(".grid-cell");
-    if (sampleCell) {
-        const rect = sampleCell.getBoundingClientRect();
-        cellW = rect.width;
-        cellH = rect.height;
-    }
+    // Use cached dimensions to prevent layout thrashing
+    const cellW = draggingState ? draggingState.cellW : 54;
+    const cellH = draggingState ? draggingState.cellH : 54;
     
     const grabR = draggingState ? draggingState.grabR : 0;
     const grabC = draggingState ? draggingState.grabC : 0;
     
-    // Align visual clone matching board grid spaces and 4px gaps exactly
-    const gapOffset = 4;
+    // Align visual clone matching board grid spaces and 0px gaps exactly
+    const gapOffset = 0;
     const left = x - (grabC * (cellW + gapOffset) + cellW / 2);
     const top = y - (grabR * (cellH + gapOffset) + cellH / 2);
     
@@ -1051,12 +1304,20 @@ function onPointerDown(e) {
         grabC = Math.floor(shape.matrix[0].length / 2);
     }
     
+    // Get cached board and cell bounds to completely prevent pointermove layout thrashing
+    const boardRect = boardEl.getBoundingClientRect();
+    let cellW = boardRect.width / 8;
+    let cellH = boardRect.height / 8;
+    
     draggingState = {
         slotIndex: slotIndex,
         shape: shape,
         grabR: grabR,
         grabC: grabC,
-        pointerId: e.pointerId
+        pointerId: e.pointerId,
+        boardRect: boardRect,
+        cellW: cellW,
+        cellH: cellH
     };
     
     // Hide dock element preview
@@ -1178,9 +1439,7 @@ function startNewGame() {
     renderBoard();
     updateUI();
     updateUndoUI();
-    if (musicEnabled) {
-        startBackgroundMusic();
-    }
+
 }
 
 // SETUP CORE ENGINE CONNECTIONS
@@ -1190,19 +1449,17 @@ function initGame() {
     
     // Load SFX and Music settings
     sfxEnabled = localStorage.getItem('blockmaster_sfx') !== 'false';
-    musicEnabled = localStorage.getItem('blockmaster_music') !== 'false';
+    musicEnabled = false;
     premiumUnlocked = localStorage.getItem('blockmaster_premium') === 'true';
     
     // Update switch elements in DOM
-    const musicTgl = document.getElementById('music-toggle');
     const sfxTgl = document.getElementById('sfx-toggle');
-    if (musicTgl) musicTgl.checked = musicEnabled;
     if (sfxTgl) sfxTgl.checked = sfxEnabled;
     
     // Show high score on start screen
     const startHighScoreVal = document.getElementById('start-high-score-val');
     if (startHighScoreVal) {
-        startHighScoreVal.innerText = highScore.toLocaleString();
+        startHighScoreVal.textContent = highScore;
     }
     
     initBoardDOM();
@@ -1259,9 +1516,7 @@ function initGame() {
             document.getElementById('start-screen-overlay').classList.add('hidden');
             startNewGame();
             AudioEngine.initContext();
-            if (musicEnabled) {
-                startBackgroundMusic();
-            }
+
         });
     }
     
@@ -1368,23 +1623,7 @@ function initGame() {
     }
 
     
-    // Music Toggle listener
-    if (musicTgl) {
-        musicTgl.addEventListener('change', (e) => {
-            musicEnabled = e.target.checked;
-            localStorage.setItem('blockmaster_music', String(musicEnabled));
-            if (!musicEnabled) {
-                // Clear chords loop immediately
-                if (chordsInterval) {
-                    clearTimeout(chordsInterval);
-                    chordsInterval = null;
-                }
-                musicPlaying = false;
-            } else {
-                startBackgroundMusic();
-            }
-        });
-    }
+
     
     // SFX Toggle listener
     if (sfxTgl) {
@@ -1402,7 +1641,7 @@ function initGame() {
                 highScore = 0;
                 localStorage.setItem('blockmaster_highscore', '0');
                 updateUI();
-                if (startHighScoreVal) startHighScoreVal.innerText = '0';
+                if (startHighScoreVal) startHighScoreVal.textContent = '0';
                 alert("En yüksek skor sıfırlandı.");
             }
         });
@@ -1501,12 +1740,12 @@ window.addEventListener("DOMContentLoaded", initGame);
 
 // BOTTOM THEME PICKER FUNCTIONS
 const THEME_SCORE_REQUIREMENTS = {
-    2: 1000000,   // Buz: 1M
-    3: 2000000,   // Çöl: 2M
-    4: 3000000,   // Sualtı: 3M
-    5: 4000000,   // Volkan: 4M
-    6: 5000000,   // Uzay: 5M
-    7: 10000000   // Zindan: 10M
+    2: 100000,   // Buz: 100K
+    3: 200000,   // Çöl: 200K
+    4: 300000,   // Sualtı: 300K
+    5: 400000,   // Volkan: 400K
+    6: 500000,   // Uzay: 500K
+    7: 1000000   // Zindan: 1M
 };
 
 function isThemeUnlocked(index) {
@@ -1540,7 +1779,7 @@ function initThemePicker() {
             if (!isThemeUnlocked(i)) {
                 // Determine theme unlock text dynamically
                 const reqScore = THEME_SCORE_REQUIREMENTS[i];
-                const scoreStr = reqScore >= 1000000 ? `${reqScore / 1000000}.000.000` : reqScore.toLocaleString();
+                const scoreStr = reqScore;
                 
                 const scoreTextSpan = document.getElementById('premium-needed-score');
                 if (scoreTextSpan) {
@@ -1607,7 +1846,7 @@ function showComboBadge(linesCount, scoreGain, consecutiveCombo) {
         comboClass = linesCount >= 4 ? 'ultra' : linesCount === 3 ? 'mega' : 'double';
     }
     
-    badge.textContent = `+${scoreGain.toLocaleString()}${multiplierText}`;
+    badge.textContent = `+${scoreGain}${multiplierText}`;
     badge.className = `combo-badge combo-${comboClass}`;
     badge.style.display = "block";
     badge.classList.remove("hidden");
@@ -1645,11 +1884,25 @@ function triggerPunchyComboAnimation(comboIdx) {
         comboPop.classList.add("combo-pop-high");
     }
     
-    if (comboIdx >= 50) {
-        comboPop.textContent = "COMBO x50 MAX!";
-    } else {
-        comboPop.textContent = `COMBO x${comboIdx}!`;
+    const COMBO_TEXTS = {
+        2: "Good!",
+        3: "Excellent!",
+        4: "Perfect!",
+        5: "Amazing!",
+        6: "Fantastic!",
+        7: "Unbelievable!",
+        8: "Phenomenal!",
+        9: "Superb!",
+        10: "Splendid!",
+        11: "Marvelous!",
+        12: "Unstoppable!"
+    };
+    
+    let text = COMBO_TEXTS[comboIdx];
+    if (!text) {
+        text = comboIdx > 12 ? `Unstoppable! x${comboIdx}` : `Combo x${comboIdx}!`;
     }
+    comboPop.textContent = text;
     comboPop.classList.remove("hidden");
     
     // Trigger animation flow
@@ -1695,87 +1948,6 @@ function triggerThemeBanner(themeIdx) {
         banner.classList.remove("animate");
     }, 2250);
     banner.dataset.timeoutId = String(tId);
-}
-
-// BACKGROUND MUSIC ENGINE (HTML5 MP3 Player with subtle Web Audio API Echo/Delay and native end-of-track loop)
-let bgMusic = null;
-let musicSource = null;
-let musicGainNode = null;
-let delayNode = null;
-let feedbackGain = null;
-let musicPlaying = false;
-
-function startBackgroundMusic() {
-    if (!musicEnabled) return;
-    
-    try {
-        // Initialize AudioContext
-        AudioEngine.initContext();
-        const ctx = AudioEngine.getContext();
-        if (!ctx) return;
-        
-        if (!bgMusic) {
-            bgMusic = new Audio("lofi_bg.mp3");
-            bgMusic.loop = true; // Let the music play all the way to the end and loop naturally
-            
-            // Connect to AudioContext
-            musicSource = ctx.createMediaElementSource(bgMusic);
-            
-            // Main control gain node (slightly increased to 0.015 volume, soft but clearly audible)
-            musicGainNode = ctx.createGain();
-            musicGainNode.gain.setValueAtTime(0.015, ctx.currentTime);
-            
-            // Delay node for subtle echo
-            delayNode = ctx.createDelay();
-            delayNode.delayTime.setValueAtTime(0.25, ctx.currentTime); // 0.25s delay
-            
-            // Feedback gain node for subtle delay repeats
-            feedbackGain = ctx.createGain();
-            feedbackGain.gain.setValueAtTime(0.18, ctx.currentTime); // 18% feedback repeats
-            
-            // Connect feedback loop
-            delayNode.connect(feedbackGain);
-            feedbackGain.connect(delayNode);
-            
-            // Dry & Wet signals mixing (reduced echo presence)
-            const dryGain = ctx.createGain();
-            dryGain.gain.setValueAtTime(0.85, ctx.currentTime);
-            
-            const wetGain = ctx.createGain();
-            wetGain.gain.setValueAtTime(0.2, ctx.currentTime); // 20% wet echo signal (reduced echo)
-            
-            // Route Dry signal: Source -> Dry -> Main Gain
-            musicSource.connect(dryGain);
-            dryGain.connect(musicGainNode);
-            
-            // Route Wet signal: Source -> Delay -> Wet -> Main Gain
-            musicSource.connect(delayNode);
-            delayNode.connect(wetGain);
-            wetGain.connect(musicGainNode);
-            
-            // Connect main gain to destination
-            musicGainNode.connect(ctx.destination);
-        }
-        
-        // Reset time and ramp up gain immediately on play
-        const nowPlay = ctx.currentTime;
-        musicGainNode.gain.cancelScheduledValues(nowPlay);
-        musicGainNode.gain.setValueAtTime(0.015, nowPlay);
-        
-        bgMusic.currentTime = 0;
-        musicPlaying = true;
-        
-        const playPromise = bgMusic.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(e => {
-                console.log("Audio play failed:", e);
-                musicPlaying = false;
-            });
-        }
-    } catch(e) {
-        console.log("Audio engine error:", e);
-        musicPlaying = false;
-    }
 }
 
 // User Interaction Trigger to comply with modern browser autoplay policies
